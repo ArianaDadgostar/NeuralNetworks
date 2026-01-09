@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HillClimbing")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+66fc9438f9feb246ea09a45d72e5d6663709f66b")]
 [assembly: System.Reflection.AssemblyProductAttribute("HillClimbing")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HillClimbing")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

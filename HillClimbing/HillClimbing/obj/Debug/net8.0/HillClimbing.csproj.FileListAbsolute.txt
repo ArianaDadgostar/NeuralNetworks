@@ -12,3 +12,4 @@
 /Users/arianadadgostar/Documents/Github Repositories/NeuralNetworks/HillClimbing/HillClimbing/obj/Debug/net8.0/HillClimbing.pdb
 /Users/arianadadgostar/Documents/Github Repositories/NeuralNetworks/HillClimbing/HillClimbing/obj/Debug/net8.0/HillClimbing.genruntimeconfig.cache
 /Users/arianadadgostar/Documents/Github Repositories/NeuralNetworks/HillClimbing/HillClimbing/obj/Debug/net8.0/ref/HillClimbing.dll
+/Users/arianadadgostar/Documents/Github Repositories/NeuralNetworks/HillClimbing/HillClimbing/obj/Debug/net8.0/HillClimbing.sourcelink.json
