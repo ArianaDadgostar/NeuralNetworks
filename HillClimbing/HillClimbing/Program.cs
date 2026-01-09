@@ -40,7 +40,7 @@ class Program
         float result = 0;
         for (int i = 0; i < goal.Length; i++)
         {
-            result += (goal[i] - current[i]);
+            result += Math.Abs(goal[i] - current[i]);
         }
         return Math.Abs(result/goal.Length);
     }
@@ -57,7 +57,6 @@ class Program
             if(Compare(newString, goal) < Compare(randomString, goal))
             {
                 randomString = newString;
-                Console.Clear();
                 Console.WriteLine(randomString);
             }
         }
