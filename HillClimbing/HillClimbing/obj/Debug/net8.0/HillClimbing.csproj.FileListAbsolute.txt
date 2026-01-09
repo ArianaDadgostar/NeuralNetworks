@@ -1,0 +1,14 @@
+/Users/arianadadgostar/Documents/Github Repositories/NeuralNetworks/HillClimbing/HillClimbing/bin/Debug/net8.0/HillClimbing
+/Users/arianadadgostar/Documents/Github Repositories/NeuralNetworks/HillClimbing/HillClimbing/bin/Debug/net8.0/HillClimbing.deps.json
+/Users/arianadadgostar/Documents/Github Repositories/NeuralNetworks/HillClimbing/HillClimbing/bin/Debug/net8.0/HillClimbing.runtimeconfig.json
+/Users/arianadadgostar/Documents/Github Repositories/NeuralNetworks/HillClimbing/HillClimbing/bin/Debug/net8.0/HillClimbing.dll
+/Users/arianadadgostar/Documents/Github Repositories/NeuralNetworks/HillClimbing/HillClimbing/bin/Debug/net8.0/HillClimbing.pdb
+/Users/arianadadgostar/Documents/Github Repositories/NeuralNetworks/HillClimbing/HillClimbing/obj/Debug/net8.0/HillClimbing.GeneratedMSBuildEditorConfig.editorconfig
+/Users/arianadadgostar/Documents/Github Repositories/NeuralNetworks/HillClimbing/HillClimbing/obj/Debug/net8.0/HillClimbing.AssemblyInfoInputs.cache
+/Users/arianadadgostar/Documents/Github Repositories/NeuralNetworks/HillClimbing/HillClimbing/obj/Debug/net8.0/HillClimbing.AssemblyInfo.cs
+/Users/arianadadgostar/Documents/Github Repositories/NeuralNetworks/HillClimbing/HillClimbing/obj/Debug/net8.0/HillClimbing.csproj.CoreCompileInputs.cache
+/Users/arianadadgostar/Documents/Github Repositories/NeuralNetworks/HillClimbing/HillClimbing/obj/Debug/net8.0/HillClimbing.dll
+/Users/arianadadgostar/Documents/Github Repositories/NeuralNetworks/HillClimbing/HillClimbing/obj/Debug/net8.0/refint/HillClimbing.dll
+/Users/arianadadgostar/Documents/Github Repositories/NeuralNetworks/HillClimbing/HillClimbing/obj/Debug/net8.0/HillClimbing.pdb
+/Users/arianadadgostar/Documents/Github Repositories/NeuralNetworks/HillClimbing/HillClimbing/obj/Debug/net8.0/HillClimbing.genruntimeconfig.cache
+/Users/arianadadgostar/Documents/Github Repositories/NeuralNetworks/HillClimbing/HillClimbing/obj/Debug/net8.0/ref/HillClimbing.dll
