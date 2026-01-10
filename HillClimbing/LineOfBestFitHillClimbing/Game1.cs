@@ -1,0 +1,103 @@
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using System.Transactions;
+
+namespace LineOfBestFitHillClimbing
+{
+    public class Game1 : Game
+    {
+        private GraphicsDeviceManager _graphics;
+        private SpriteBatch spriteBatch;
+        private Texture2D pixel;
+        private int[] points;
+        private int index;
+
+        const int LINENUM = 30;
+
+        public Game1()
+        {
+            _graphics = new GraphicsDeviceManager(this);
+            Content.RootDirectory = "Content";
+            IsMouseVisible = true;
+        }
+
+        public int CalculateFit(int[] points, int slope, int b)
+        {
+            int result = 0;
+            for (int i = 0; i < points.Length; i++)
+            {
+                int line = (slope * points[i]) + b;
+                result += points[i] - line;
+            }
+
+            return result / points.Length;
+        }
+
+        protected override void Initialize()
+        {
+            // TODO: Add your initialization logic here
+
+            base.Initialize();
+        }
+
+        protected override void LoadContent()
+        {
+            spriteBatch = new SpriteBatch(GraphicsDevice);
+
+            pixel = new Texture2D(GraphicsDevice, 1, 1);
+            pixel.SetData(new[] { Color.White });
+
+            points = new int[100];
+            index = 0;
+
+            // TODO: use this.Content to load your game content here
+        }
+
+        protected override void Update(GameTime gameTime)
+        {
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+                Exit();
+
+            // TODO: Add your update logic here
+
+            base.Update(gameTime);
+        }
+
+        public void DrawGraph(int xLength, int yLength)
+        {
+            int width = xLength / LINENUM;
+            int height = yLength / LINENUM;
+
+            for (int i = 0; i <= LINENUM; i++)
+            {
+                spriteBatch.Draw(pixel,
+                                 new Rectangle(width * (i + 1), height, 2, yLength),
+                                 Color.Black);
+
+                spriteBatch.Draw(pixel,
+                                 new Rectangle(width, height * (i + 1), xLength, 2),
+                                 Color.Black);
+            }
+        }
+
+        public void AddPoints(int x, int y)
+        {
+            spriteBatch.Draw(pixel,
+                             new Rectangle(x, y, 15, 15),
+                             Color.IndianRed);
+        }
+
+        protected override void Draw(GameTime gameTime)
+        {
+            spriteBatch.Begin();
+            GraphicsDevice.Clear(Color.DarkOliveGreen);
+
+            DrawGraph(450, 450);
+            // TODO: Add your drawing code here
+
+            base.Draw(gameTime);
+            spriteBatch.End();
+        }
+    }
+}
