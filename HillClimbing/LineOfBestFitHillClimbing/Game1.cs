@@ -2,28 +2,41 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Collections.Generic;
 using System.Transactions;
 
 namespace LineOfBestFitHillClimbing
 {
     public class Line
     {
-        public int slope;
+        public float slope;
         public int b;
 
-        public Line(int slope, int b)
+        public Line(float slope, int b)
         {
             this.slope = slope;
             this.b = b;
         }
     }
+
+    public class Point
+    {
+        public int x;
+        public int y;
+
+        public Point(int x, int y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
     public class Game1 : Game
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch spriteBatch;
         private Texture2D pixel;
-        private (int x, int y)[] points;
-        private int index;
+        private List<Point> points;
         private MouseState previousMouseState;
         private Line line;
 
@@ -38,16 +51,16 @@ namespace LineOfBestFitHillClimbing
             IsMouseVisible = true;
         }
 
-        public int CalculateFit((int x, int y)[] points, int slope, int b)
+        public float CalculateFit(List<Point> points, float slope, int b)
         {
-            int result = 0;
-            for (int i = 0; i < points.Length; i++)
+            float result = 0;
+            for (int i = 0; i < points.Count; i++)
             {
-                int lineResult = (slope * points[i].x) + b;
-                result += points[i].y - lineResult;
+                float lineResult = (slope * points[i].x) + b;
+                result += Math.Abs(points[i].y - lineResult);
             }
 
-            return Math.Abs(result / points.Length);
+            return Math.Abs(result);
         }
 
         protected override void Initialize()
@@ -64,34 +77,69 @@ namespace LineOfBestFitHillClimbing
             pixel = new Texture2D(GraphicsDevice, 1, 1);
             pixel.SetData(new[] { Color.White });
 
-            points = new (int x, int y)[100];
-            index = 0;
+            points = new List<Point>();
 
             Random random = new Random();
 
-            line = new Line(random.Next(1, 30), random.Next(1, 30));
+            line = new Line(random.Next(0, 2), 100);
 
             // TODO: use this.Content to load your game content here
         }
 
-        public void MutateLine(ref int slope, ref int b)
+        public void MutateLine(ref float slope, ref int b)
         {
             Random random = new Random();
-            int newSlope = slope + random.Next(-1, 2);
-            int newB = b + random.Next(-1, 2);
+            float newSlope;
+            int newB;
+            if (random.Next(0, 2) == 0)
+            {
+                newSlope = slope + (float)(random.Next(0, 2) * 2 - 1)/50;
+                newB = b;
+            }
+            else
+            {
+                newB = b + ((random.Next(0, 2) * 2 - 1) * 5);
+                newSlope = slope;
+            }
 
-            // if(CalculateFit(points, slope, b) < CalculateFit(points, newSlope, newB)) return;
+            if(CalculateFit(points, slope, b) <= CalculateFit(points, newSlope, newB)) return;
 
             slope = newSlope;
             b = newB;
+
+            Window.Title = $"B: {b}, Slope: {slope}";
         }
+
+        #region UpdateLogic
+
+        public void UpdateMouse()
+        {
+            MouseState currentMouseState = Mouse.GetState();
+
+            if (currentMouseState.LeftButton == ButtonState.Pressed &&
+                previousMouseState.LeftButton == ButtonState.Released)
+            {
+                AddPoints(currentMouseState.X, currentMouseState.Y);
+            }
+
+            previousMouseState = currentMouseState;
+        }
+
+        public void AddPoints(int x, int y)
+        {
+            points.Add(new Point(x, y));
+        }
+
+        #endregion
 
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-                MutateLine(ref line.slope, ref line.b);
+            MutateLine(ref line.slope, ref line.b);
+
+            UpdateMouse();
 
             // TODO: Add your update logic here
 
@@ -117,18 +165,9 @@ namespace LineOfBestFitHillClimbing
             }
         }
 
-        public void AddPoints(int x, int y)
-        {
-            spriteBatch.Draw(pixel,
-                             new Rectangle(x, y, 15, 15),
-                             Color.IndianRed);
-            points[index] = (x, y);
-            index++;
-        }
-
         public void DrawPoints()
         {
-            for (int i = 0; i < index; i ++)
+            for (int i = 0; i < points.Count; i ++)
             {
                 spriteBatch.Draw(pixel,
                                  new Rectangle(points[i].x, points[i].y, 15, 15),
@@ -141,7 +180,7 @@ namespace LineOfBestFitHillClimbing
             for(int i = 0; i <= XLENGTH; i ++)
             {
                 spriteBatch.Draw(pixel,
-                                 new Rectangle(i, (line.slope * i) + line.b, 5, 5),
+                                 new Rectangle(i, (int)((line.slope * i) + line.b), 5, 5),
                                  Color.DarkBlue);
             }
         }
@@ -152,17 +191,6 @@ namespace LineOfBestFitHillClimbing
         {
             spriteBatch.Begin();
             GraphicsDevice.Clear(Color.DarkOliveGreen);
-
-
-            MouseState currentMouseState = Mouse.GetState();
-
-            if (currentMouseState.LeftButton == ButtonState.Pressed &&
-                previousMouseState.LeftButton == ButtonState.Released)
-            {
-                AddPoints(currentMouseState.X, currentMouseState.Y);
-            }
-
-            previousMouseState = currentMouseState;
 
             DrawGraph(450, 450);
             DrawPoints();
