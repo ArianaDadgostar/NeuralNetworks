@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
-using System.Transactions;
 
 namespace LineOfBestFitHillClimbing
 {
@@ -93,7 +92,7 @@ namespace LineOfBestFitHillClimbing
             int newB;
             if (random.Next(0, 2) == 0)
             {
-                newSlope = slope + (float)(random.Next(0, 2) * 2 - 1)/50;
+                newSlope = slope + (float)(random.Next(0, 2) * 2 - 1) / 50;
                 newB = b;
             }
             else
@@ -102,7 +101,7 @@ namespace LineOfBestFitHillClimbing
                 newSlope = slope;
             }
 
-            if(CalculateFit(points, slope, b) <= CalculateFit(points, newSlope, newB)) return;
+            if (CalculateFit(points, slope, b) <= CalculateFit(points, newSlope, newB)) return;
 
             slope = newSlope;
             b = newB;
@@ -167,7 +166,7 @@ namespace LineOfBestFitHillClimbing
 
         public void DrawPoints()
         {
-            for (int i = 0; i < points.Count; i ++)
+            for (int i = 0; i < points.Count; i++)
             {
                 spriteBatch.Draw(pixel,
                                  new Rectangle(points[i].x, points[i].y, 15, 15),
@@ -177,7 +176,7 @@ namespace LineOfBestFitHillClimbing
 
         public void DrawLine()
         {
-            for(int i = 0; i <= XLENGTH; i ++)
+            for (int i = 0; i <= XLENGTH; i++)
             {
                 spriteBatch.Draw(pixel,
                                  new Rectangle(i, (int)((line.slope * i) + line.b), 5, 5),
