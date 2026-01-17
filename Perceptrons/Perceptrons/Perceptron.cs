@@ -25,5 +25,18 @@
 
             bias = random.Next(min, max);
         }
+
+        public double Compute(double[] inputs)
+        {
+            double result = 0;
+
+            for(int i = 0; i < inputs.Length; i++)
+            {
+                result += (inputs[i] * weights[i]);
+            }
+
+            result += bias;
+            return result;
+        }
     }
 }
