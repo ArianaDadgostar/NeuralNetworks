@@ -2,8 +2,8 @@
 {
     public class Perceptron
     {
-        double[] weights;
-        double bias;
+        public double[] weights;
+        public double bias;
 
         public Perceptron(int numOfInputs)
         {
@@ -16,15 +16,15 @@
             this.bias = bias;
         }
 
-        public bool Randomize(Random random, int min, int max, double[] inputs, double goal)
+        public bool Randomize(Random random, int min, int max, double[][] inputs, double goal)
         {
             double[] newWeights = new double[weights.Length];
             for (int i = 0; i < weights.Length; i++)
             {
-                newWeights[i] = random.Next(min, max);
+                newWeights[i] = (max - min) * random.NextSingle() + min;
             }
 
-            double newBias = random.Next(min, max);
+            double newBias = (max - min) * random.NextSingle() + min;
 
             return Compare(inputs, weights, newWeights, bias, newBias, goal);
         }
@@ -42,16 +42,25 @@
             return result;
         }
 
-        public bool Compare(double[] inputs, double[] ogWeights, double[] newWeights, double ogBias, double newBias, double goal)
+        public bool Compare(double[][] inputs, double[] ogWeights, double[] newWeights, double ogBias, double newBias, double goal)
         {
-            double original = Compute(inputs, ogWeights, ogBias);
-            double generated = Compute(inputs, newWeights, newBias);
+            double originalResult = 0;
+            double newResult = 0;
+            
+            foreach(double[] input in inputs)
+            {
+                double original = Compute(input, ogWeights, ogBias);
+                double generated = Compute(input, newWeights, newBias);
 
-            if(Math.Abs(original - goal) < Math.Abs(generated) - goal) return false;
+                originalResult += Math.Abs(original - goal);
+                newResult = Math.Abs(generated - goal);
+
+            }
+            
+            if(originalResult < newResult) return false;
 
             weights = newWeights;
             bias = newBias;
-            
             return true;
         }
     }
