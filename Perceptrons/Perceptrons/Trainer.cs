@@ -1,12 +1,29 @@
+using System.ComponentModel;
 using Perceptrons;
 
 public class Trainer
 {
-    Perceptron perceptron;
+    public Perceptron perceptron;
 
     public Trainer(int numOfInputs)
     {
         perceptron = new Perceptron(numOfInputs);
+    }
+
+    public void RandomMutation()
+    {
+        Random random = new Random();
+        float rVal = random.NextSingle();
+        rVal += random.Next(-2, 2);
+
+        int mutatedVar = random.Next(-1, perceptron.weights.Length);
+        if(mutatedVar < 0)
+        {
+            perceptron.bias += rVal;
+            return;
+        }
+
+        perceptron.weights[mutatedVar] += rVal;
     }
 
     public double ErrorCalculation(double[] results, double[] targets)
@@ -20,5 +37,17 @@ public class Trainer
         return error;
     }
 
-    public void Calculate(int[][] inputs, double[] targets, )
+    public void Calculate(double[][] inputs, double[] targets, Func<double[], double[], double> ErrorCalc)
+    {
+        double[] oldWeights = new double[] {perceptron.weights[0], perceptron.weights[1]};
+        double oldBias = perceptron.bias;
+        double[] oldResults = perceptron.Compute(inputs);
+        RandomMutation();
+
+        double[] newResults = perceptron.Compute(inputs);
+        if(ErrorCalc(newResults, targets) < ErrorCalc(oldResults, targets)) return;
+
+        perceptron.weights = oldWeights;
+        perceptron.bias = oldBias;
+    }
 }

@@ -1,11 +1,15 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using System.Drawing;
 using System.Reflection.Emit;
 
 class Program 
 {
     public const int MINCHAR = 32;
     public const int MAXCHAR = 126;
+
+    public Point max;
+    public Point min;
 
     static string RandomMutate(string current)
     {

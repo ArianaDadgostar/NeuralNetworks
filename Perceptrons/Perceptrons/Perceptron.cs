@@ -18,7 +18,7 @@ namespace Perceptrons
             this.bias = bias;
         }
 
-        public void Randomize(Random random, int min, int max, double[][] inputs, double goal)
+        public void Randomize(Random random, int min, int max)
         {
             for (int i = 0; i < weights.Length; i++)
             {

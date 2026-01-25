@@ -119,6 +119,7 @@ namespace LineOfBestFitHillClimbing
                 previousMouseState.LeftButton == ButtonState.Released)
             {
                 AddPoints(currentMouseState.X, currentMouseState.Y);
+                if(currentMouseState.X < )
             }
 
             previousMouseState = currentMouseState;
