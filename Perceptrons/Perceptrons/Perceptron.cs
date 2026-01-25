@@ -1,4 +1,6 @@
-﻿namespace Perceptrons
+﻿using System.Globalization;
+
+namespace Perceptrons
 {
     public class Perceptron
     {
@@ -16,52 +18,62 @@
             this.bias = bias;
         }
 
-        public bool Randomize(Random random, int min, int max, double[][] inputs, double goal)
+        public void Randomize(Random random, int min, int max, double[][] inputs, double goal)
         {
-            double[] newWeights = new double[weights.Length];
             for (int i = 0; i < weights.Length; i++)
             {
-                newWeights[i] = (max - min) * random.NextSingle() + min;
+                weights[i] = (max - min) * random.NextSingle() + min;
             }
 
-            double newBias = (max - min) * random.NextSingle() + min;
+            bias = (max - min) * random.NextSingle() + min;
 
-            return Compare(inputs, weights, newWeights, bias, newBias, goal);
+            //return Compare(inputs, weights, newWeights, bias, newBias, goal);
         }
 
-        public double Compute(double[] inputs, double[] newWeight, double newBias)
+        public double Compute(double[] inputs)
         {
             double result = 0;
 
             for(int i = 0; i < inputs.Length; i++)
             {
-                result += (inputs[i] * newWeight[i]);
+                result += (inputs[i] * weights[i]);
             }
 
-            result += newBias;
+            result += bias;
             return result;
         }
 
-        public bool Compare(double[][] inputs, double[] ogWeights, double[] newWeights, double ogBias, double newBias, double goal)
+
+        public double[] Compute(double[][] inputs)
         {
-            double originalResult = 0;
-            double newResult = 0;
-            
-            foreach(double[] input in inputs)
+            double[] result = new double[inputs.Length];
+            for(int j = 0; j < result.Length; j++)
             {
-                double original = Compute(input, ogWeights, ogBias);
-                double generated = Compute(input, newWeights, newBias);
-
-                originalResult += Math.Abs(original - goal);
-                newResult = Math.Abs(generated - goal);
-
+                result[j] = Compute(inputs[j]);
             }
-            
-            if(originalResult < newResult) return false;
-
-            weights = newWeights;
-            bias = newBias;
-            return true;
+            return result;
         }
+
+        // public bool Compare(double[][] inputs, double[] ogWeights, double[] newWeights, double ogBias, double newBias, double goal)
+        // {
+        //     double originalResult = 0;
+        //     double newResult = 0;
+            
+        //     foreach(double[] input in inputs)
+        //     {
+        //         double original = Compute(input, ogWeights, ogBias);
+        //         double generated = Compute(input, newWeights, newBias);
+
+        //         originalResult += Math.Abs(original - goal);
+        //         newResult = Math.Abs(generated - goal);
+
+        //     }
+            
+        //     if(originalResult < newResult) return false;
+
+        //     weights = newWeights;
+        //     bias = newBias;
+        //     return true;
+        // }
     }
 }
