@@ -40,7 +40,7 @@ namespace Perceptrons
             }
 
             result += bias;
-            return result;
+            return ActivationFunc.Function(result);
         }
 
 
