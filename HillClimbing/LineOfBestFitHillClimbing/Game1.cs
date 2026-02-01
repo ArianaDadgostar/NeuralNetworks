@@ -3,6 +3,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace LineOfBestFitHillClimbing
 {
@@ -20,8 +22,8 @@ namespace LineOfBestFitHillClimbing
 
     public class Point
     {
-        public int x;
-        public int y;
+        public float x;
+        public float y;
 
         public Point(int x, int y)
         {
@@ -38,6 +40,9 @@ namespace LineOfBestFitHillClimbing
         private List<Point> points;
         private MouseState previousMouseState;
         private Line line;
+
+        public Point min;
+        public Point max;
 
         const int LINENUM = 30;
         const int XLENGTH = 450;
@@ -65,6 +70,9 @@ namespace LineOfBestFitHillClimbing
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+
+            min = new Point(int.MaxValue, int.MaxValue);
+            max = new Point(0, 0);
 
             base.Initialize();
         }
@@ -119,7 +127,23 @@ namespace LineOfBestFitHillClimbing
                 previousMouseState.LeftButton == ButtonState.Released)
             {
                 AddPoints(currentMouseState.X, currentMouseState.Y);
-                if(currentMouseState.X < )
+                if(currentMouseState.Y < min.y)
+                {
+                    min.y = points[points.Count - 1].y;
+                }
+                else if(currentMouseState.Y > max.y)
+                {
+                    max.y = points[points.Count - 1].y;
+                }
+
+                if(currentMouseState.X < min.x)
+                {
+                    min.x = points[points.Count - 1].x;
+                }
+                else if(currentMouseState.X > max.x)
+                {
+                    max.x = points[points.Count - 1].x;
+                }
             }
 
             previousMouseState = currentMouseState;
@@ -128,6 +152,24 @@ namespace LineOfBestFitHillClimbing
         public void AddPoints(int x, int y)
         {
             points.Add(new Point(x, y));
+        }
+
+        public void UpdatePoints(int nMax, int nMin)
+        {
+            foreach(Point point in points)
+            {
+                point.x = (point.x - min.x) / (max.x - min.x) * (nMax - nMin) + nMin;
+                point.y = (point.y - min.y) / (max.y - min.y) * (nMax - nMin) + nMin;
+            }
+        }
+
+        public void UnUpdatePoints(int nMax, int nMin)
+        {
+            foreach(Point point in points)
+            {
+                point.x = (point.x - nMin) / (nMax - nMin) * (max.x - min.x) + min.x;
+                point.y = (point.y - nMin) / (nMax - nMin) * (max.y - min.y) + min.y;
+            }
         }
 
         #endregion
@@ -170,9 +212,25 @@ namespace LineOfBestFitHillClimbing
             for (int i = 0; i < points.Count; i++)
             {
                 spriteBatch.Draw(pixel,
-                                 new Rectangle(points[i].x, points[i].y, 15, 15),
+                                 new Rectangle((int)points[i].x, (int)points[i].y, 15, 15),
                                  Color.IndianRed);
             }
+
+            if(points.Count == 0) return;
+
+            // UpdatePoints(1, -1);
+
+            // foreach(Point point in points)
+            // {
+            //     ;
+            // }
+
+            // UnUpdatePoints(1, -1);
+
+            // foreach (Point point in points)
+            // {
+            //     ;
+            // }
         }
 
         public void DrawLine()
@@ -194,7 +252,9 @@ namespace LineOfBestFitHillClimbing
 
             DrawGraph(450, 450);
             DrawPoints();
+            UpdatePoints(1, -1);
             DrawLine();
+            UnUpdatePoints(1, -1);
             // TODO: Add your drawing code here
 
             base.Draw(gameTime);

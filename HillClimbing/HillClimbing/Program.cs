@@ -8,9 +8,6 @@ class Program
     public const int MINCHAR = 32;
     public const int MAXCHAR = 126;
 
-    public Point max;
-    public Point min;
-
     static string RandomMutate(string current)
     {
         var random = new Random();
