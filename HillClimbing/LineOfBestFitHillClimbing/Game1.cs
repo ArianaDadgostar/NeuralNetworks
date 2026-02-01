@@ -41,6 +41,9 @@ namespace LineOfBestFitHillClimbing
         private MouseState previousMouseState;
         private Line line;
 
+        const int nMax = 1;
+        const int nMin = -1;
+
         public Point min;
         public Point max;
 
@@ -154,7 +157,7 @@ namespace LineOfBestFitHillClimbing
             points.Add(new Point(x, y));
         }
 
-        public void UpdatePoints(int nMax, int nMin)
+        public void UpdatePoints()
         {
             foreach(Point point in points)
             {
@@ -163,13 +166,21 @@ namespace LineOfBestFitHillClimbing
             }
         }
 
-        public void UnUpdatePoints(int nMax, int nMin)
+        public void UnUpdatePoints()
         {
             foreach(Point point in points)
             {
                 point.x = (point.x - nMin) / (nMax - nMin) * (max.x - min.x) + min.x;
                 point.y = (point.y - nMin) / (nMax - nMin) * (max.y - min.y) + min.y;
             }
+        }
+
+        public (float, float) UnUpdatePoints(Point point)
+        {
+            point.x = (point.x - nMin) / (nMax - nMin) * (max.x - min.x) + min.x;
+            point.y = (point.y - nMin) / (nMax - nMin) * (max.y - min.y) + min.y;
+            
+            return (point.x, point.y);
         }
 
         #endregion
@@ -252,9 +263,9 @@ namespace LineOfBestFitHillClimbing
 
             DrawGraph(450, 450);
             DrawPoints();
-            UpdatePoints(1, -1);
+            UpdatePoints();
             DrawLine();
-            UnUpdatePoints(1, -1);
+            UnUpdatePoints();
             // TODO: Add your drawing code here
 
             base.Draw(gameTime);
