@@ -19,12 +19,12 @@ public class ActivationFunc
 
     public static double Function(double input)
     {
-        if(input < 1) return 0;
-        return 1;
+        if(input > 0) return 1;
+        return 0;
     }
 
-    public double Derivative(double input)
+    public static double Derivative()
     {
-        return 0;
+        return 1;
     }
 }

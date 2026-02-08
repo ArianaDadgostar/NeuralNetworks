@@ -26,6 +26,18 @@ public class Trainer
         perceptron.weights[mutatedVar] += rVal;
     }
 
+    public static double StaticErrorCalculation(double[] results, double[] targets)
+    {
+        double error = 0;
+        for(int i = 0; i < results.Length; i ++)
+        {
+            error += (targets[i] - results[i]) * (targets[i] - results[i]);
+        }
+        error /= results.Length;
+        return error;
+    }
+
+
     public double ErrorCalculation(double[] results, double[] targets)
     {
         double error = 0;
@@ -41,10 +53,10 @@ public class Trainer
     {
         double[] oldWeights = new double[] {perceptron.weights[0], perceptron.weights[1]};
         double oldBias = perceptron.bias;
-        double[] oldResults = perceptron.Compute(inputs);
+        double[] oldResults = perceptron.RegularCompute(inputs);
         RandomMutation();
 
-        double[] newResults = perceptron.Compute(inputs);
+        double[] newResults = perceptron.RegularCompute(inputs);
         if(ErrorCalc(newResults, targets) < ErrorCalc(oldResults, targets)) return;
 
         perceptron.weights = oldWeights;

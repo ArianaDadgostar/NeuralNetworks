@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Perceptrons
 {
@@ -40,11 +41,10 @@ namespace Perceptrons
             }
 
             result += bias;
-            return ActivationFunc.Function(result);
+            return result;
         }
 
-
-        public double[] Compute(double[][] inputs)
+        public double[] RegularCompute(double[][] inputs)
         {
             double[] result = new double[inputs.Length];
             for(int j = 0; j < result.Length; j++)
@@ -54,26 +54,85 @@ namespace Perceptrons
             return result;
         }
 
-        // public bool Compare(double[][] inputs, double[] ogWeights, double[] newWeights, double ogBias, double newBias, double goal)
-        // {
-        //     double originalResult = 0;
-        //     double newResult = 0;
-            
-        //     foreach(double[] input in inputs)
-        //     {
-        //         double original = Compute(input, ogWeights, ogBias);
-        //         double generated = Compute(input, newWeights, newBias);
+#region Activation
 
-        //         originalResult += Math.Abs(original - goal);
-        //         newResult = Math.Abs(generated - goal);
+        public double[] ActivationCompute(double[][] inputs)
+        {
+            double[] result = new double[inputs.Length];
+            for(int j = 0; j < result.Length; j++)
+            {
+                result[j] = Compute(inputs[j]);
+                result[j] = ActivationFunc.Function(result[j]);
+            }
+            return result;
+        }
 
-        //     }
-            
-        //     if(originalResult < newResult) return false;
+        public double ChangeCalculation(double[] inputs, double desiredOutput, double input)
+        {
+            double derivative = 0;
+            foreach(double val in inputs)
+            {
+                derivative += 2 * (desiredOutput - val);
+            }
+            derivative /= inputs.Length;
 
-        //     weights = newWeights;
-        //     bias = newBias;
-        //     return true;
-        // }
+            return derivative * ActivationFunc.Derivative();
+        }
+
+        public double Train(double[] inputs, double desiredOutput)
+        {
+            double output = Compute(inputs);
+            double error = desiredOutput - output;
+
+            for(int i = 0; i < weights.Length; i++)
+            {
+                weights[i] -= ChangeCalculation(inputs, desiredOutput, inputs[i]);
+            }
+
+            bias -= ChangeCalculation(inputs, desiredOutput, 1);
+
+            return error * error;
+        }
+
+        public void ChangeValues(double[][] inputs, double[] desiredOutput)
+        {
+                for(int i = 0; i < inputs.Length; i++)
+                {
+                    for(int j = 0; j < weights.Length; j++)
+                    {
+                        double original = Trainer.StaticErrorCalculation(ActivationCompute(inputs), desiredOutput);
+                        double changeValue = ChangeCalculation(inputs[i], desiredOutput[i], inputs[i][j]);
+                        weights[j] += changeValue;
+                        if(Trainer.StaticErrorCalculation(ActivationCompute(inputs), desiredOutput) < original) return;
+
+                        weights[j] -= changeValue;
+                    }
+
+                        double originalBias = Trainer.StaticErrorCalculation(ActivationCompute(inputs), desiredOutput);
+                        double biasChange = ChangeCalculation(inputs[i], desiredOutput[i], 1);
+                        bias += biasChange;
+                        if(Trainer.StaticErrorCalculation(ActivationCompute(inputs), desiredOutput) < originalBias) return;
+
+                        bias -= biasChange;
+                }
+        }
+
+        public double[] Train(double[][] inputs, double[] desiredOutput)
+        {
+            double[] errors = new double[inputs.Length];
+            for(int i = 0; i < inputs.Length; i++)
+            {
+                double output = Compute(inputs[i]);
+                output = ActivationFunc.Function(output);
+                double error = desiredOutput[i] - output;
+
+                ChangeValues(inputs, desiredOutput);
+
+                errors[i] = error * error;
+            }
+            return errors;
+        }
     }
+
+#endregion
 }
