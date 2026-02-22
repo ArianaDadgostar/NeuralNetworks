@@ -1,0 +1,30 @@
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeedForwardNetwork", "FeedForwardNetwork\FeedForwardNetwork.csproj", "{5CC8FB56-A9DA-1196-68B5-CA9D63B4C20B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeedForwardNetwork.Tests", "FeedForwardNetwork.Tests\FeedForwardNetwork.Tests.csproj", "{BFB29BEA-2E3F-44BD-85CE-642CFAFE1690}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5CC8FB56-A9DA-1196-68B5-CA9D63B4C20B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CC8FB56-A9DA-1196-68B5-CA9D63B4C20B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CC8FB56-A9DA-1196-68B5-CA9D63B4C20B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CC8FB56-A9DA-1196-68B5-CA9D63B4C20B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFB29BEA-2E3F-44BD-85CE-642CFAFE1690}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFB29BEA-2E3F-44BD-85CE-642CFAFE1690}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFB29BEA-2E3F-44BD-85CE-642CFAFE1690}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFB29BEA-2E3F-44BD-85CE-642CFAFE1690}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {155721FA-B2D3-4AF1-8358-6C632A4513B1}
+	EndGlobalSection
+EndGlobal
