@@ -61,6 +61,14 @@ public class Layer
         }
     }
 
+    public void Calculate(double[] inputs)
+    {
+        for(int i = 0; i < neurons.Length; i ++)
+        {
+            outputs[i] = neurons[i].Output;
+        }
+    }
+
     public void Randomize(Random random)
     {
         for(int i = 0; i < neurons.Length; i++)
@@ -73,6 +81,7 @@ public class Layer
 public class Network
 {
     public Layer[] layers;
+    public double[] outputs;
     public Action<int> ErrorCalculation;
 
     public void Randomize()
