@@ -15,12 +15,23 @@ public class ActivationFunc
         return 0;
     }
 
+    public static double SinFunc(double input)
+    {
+        return input;
+    }
+
     public double Compute(double input)
     {
         return activation(input);
     }
 
     public static double Derivative()
+    {
+        return 1;
+    }
+
+
+    public static double Derivative(double input)
     {
         return 1;
     }

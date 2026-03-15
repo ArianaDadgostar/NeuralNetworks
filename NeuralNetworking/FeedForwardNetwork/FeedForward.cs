@@ -28,13 +28,13 @@ public class Neuron
     public ActivationFunc Activation ;
 
     public void Compute()
-{
-    double sum = bias;
-    foreach (var d in dendrites)
-        sum += d.Compute();
+    {
+        double sum = bias;
+        foreach (var d in dendrites)
+            sum += d.Compute();
 
-    Output = Activation.Compute(sum);
-}
+        Output = Activation.Compute(sum);
+    }
 
 
     public void Randomize(Random random)

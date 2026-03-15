@@ -1,4 +1,6 @@
 using System.Net.Sockets;
+using System.Reflection.Emit;
+using System.Reflection.Metadata.Ecma335;
 using FeedForwardNetwork;
 
 public class SinProj
@@ -8,6 +10,16 @@ public class SinProj
     public SinProj(int length)
     {
         networks = new Network[length];
+        for(int i = 0; i < networks.Length; i ++)
+        {
+            networks[i] = new Network();
+            networks[i].layers = new Layer[3];
+            for(int j = 0; j < networks[i].layers.Length; j++)
+            {
+                ActivationFunc acti = new ActivationFunc(ActivationFunc.SinFunc, ActivationFunc.Derivative);
+                networks[i].layers[j] = new Layer(acti, (-1 * Math.Abs(i - 1)) + 2);
+            }
+        }
     }
 
     public double FitnessFunc(double[] inputs, Network network)
@@ -34,8 +46,11 @@ public class SinProj
         PriorityQueue<Network, double> population = new PriorityQueue<Network, double>();
         for(int i = 0; i < inputs.Length; i++)
         {
-            networks[i].layers[0].Calculate(new double[] { inputs[i] });
-            population.Enqueue(networks[i], FitnessFunc(inputs, networks[i]));
+            foreach(Layer layer in networks[i].layers)
+            {
+                networks[i].layers[0].Calculate(new double[] { inputs[i] });
+                population.Enqueue(networks[i], FitnessFunc(inputs, networks[i]));
+            }
         }
 
         return population;
@@ -44,10 +59,69 @@ public class SinProj
     public void Mutate(double[] inputs)
     {
         PriorityQueue<Network, double> population = Sort(inputs);
+        Network[] top = new Network[(int)(population.Count * 0.1)];
+        Network[] bottom = new Network[top.Length];
+        Network[] middle = new Network[population.Count - (top.Length + bottom.Length)];
+
+        for(int i = 0; i < population.Count; i++)
+        {
+            if(i < top.Length)
+            {
+                top[i] = population.Dequeue();
+                continue;
+            }
+            else if(i < middle.Length + top.Length - 1)
+            {
+                middle[i - top.Length] = population.Dequeue();
+                continue;
+            }
+
+            bottom[i] = population.Dequeue();
+        }
+
+        CrossOver(top, middle);
+        for(int i = 0; i < bottom.Length; i++)
+        {
+            bottom[i].Randomize();
+        }
+    }
+
+    public void CrossOver(Network[] top, Network[] middle)
+    {
+        Random random = new Random();
+        for(int w = 0; w < top.Length; w++)
+        {
+            for(int l = 0; l < top[w].layers.Length; l ++)
+            {
+                for(int n = 0; n < top[w].layers[l].neurons.Length; n ++)
+                {
+                    double split = random.Next(top[w].layers[l].neurons[n].dendrites.Length);
+    
+                    for(int d = 0; d < top[w].layers[l].neurons[n].dendrites.Length; d++)
+                    {
+                        if(d < split)
+                        {
+                            middle[w].layers[l].neurons[n].dendrites[d].weight = top[w].layers[l].neurons[n].dendrites[d].weight;
+                        }
+                        else
+                        {
+                            top[w].layers[l].neurons[n].dendrites[d].weight = middle[w].layers[l].neurons[n].dendrites[d].weight;
+                        }
+                    }
+                }
+            }
+        }
     }
     
     public void Train()
     {
-        
+        Random random = new Random();
+        double[] inputs = new double[5];
+        for(int i = 0; i < inputs.Length; i ++)
+        {
+            inputs[i] = (double)random.Next(-1, 1);
+        }
+
+        Mutate(inputs);
     }
 }
