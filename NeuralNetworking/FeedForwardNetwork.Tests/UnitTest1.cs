@@ -1,8 +1,17 @@
 namespace FeedForwardNetwork.Tests;
 using FeedForwardNetwork;
+using Xunit.Abstractions;
 
 public class FeedForwardNetworkTests
 {
+    private readonly ITestOutputHelper output;
+
+    // Constructor to inject ITestOutputHelper
+    public FeedForwardNetworkTests(ITestOutputHelper output)
+    {
+        this.output = output;
+    }
+
     [Fact]
     public void FeedForward_WithKnownWeights_ReturnsCorrectOutput()
     {
@@ -39,16 +48,27 @@ public class FeedForwardNetworkTests
         Assert.Equal(expected, output);
     }
 
+    [Fact]
+
     public void SinProj_FitnessFunc_ReturnsExpectedFitness()
     {
-        // Create a simple network with known weights
-        Network network = new Network(new[] { 1 }, new ActivationFunc(x => x, x => 1.0));
-        network.layers[0].neurons[0].dendrites = new[] { new Dendrite(null, network.layers[0].neurons[0], 1.0) };
+        SinProj sinProj = new SinProj(100);
 
-        SinProj sinProj = new SinProj(1);
-        double fitness = sinProj.FitnessFunc(new double[] { Math.PI / 2 }, network);
+        
+        Random random = new Random();
+        double[] inputs = new double[100];
+        for(int i = 0; i < inputs.Length; i ++)
+        {  
+            inputs[i] = (double)random.NextDouble() * random.Next(-1, 1);
+        }
+            double result = sinProj.Train(inputs );
 
-        // The expected output for sin(pi/2) is 1, so fitness should be close to 0
-        Assert.InRange(fitness, -0.01, 0.01);
+        while(Math.Abs(result) > 0.01) // Arbitrary threshold for "good enough" fitness
+        {
+            result = sinProj.Train(inputs);
+            // The expected output for sin(pi/2) is 1, so fitness should be close to 0
+            output.WriteLine("Fitness: " + result);
+        }
+        ;
     }
 }

@@ -17,7 +17,8 @@ public class SinProj
             for(int j = 0; j < networks[i].layers.Length; j++)
             {
                 ActivationFunc acti = new ActivationFunc(ActivationFunc.SinFunc, ActivationFunc.Derivative);
-                networks[i].layers[j] = new Layer(acti, (-1 * Math.Abs(i - 1)) + 2);
+                networks[i].layers[j] = new Layer(acti, 100);
+                //(-1 * Math.Abs(j - 1)) + 2
             }
         }
     }
@@ -27,7 +28,7 @@ public class SinProj
         for(int i = 0; i < network.layers.Length; i++)
         {
             network.layers[i].Calculate(inputs);
-            inputs = network.layers[i].outputs;
+            //inputs = network.layers[i].outputs;
         }
         network.outputs = network.layers[network.layers.Length - 1].outputs;
 
@@ -44,13 +45,16 @@ public class SinProj
     public PriorityQueue<Network, double> Sort(double[] inputs)
     {
         PriorityQueue<Network, double> population = new PriorityQueue<Network, double>();
-        for(int i = 0; i < inputs.Length; i++)
+        for(int j = 0; j < networks.Length; j++)
         {
-            foreach(Layer layer in networks[i].layers)
+            for(int i = 0; i < inputs.Length; i++)
             {
-                networks[i].layers[0].Calculate(new double[] { inputs[i] });
-                population.Enqueue(networks[i], FitnessFunc(inputs, networks[i]));
+                foreach(Layer layer in networks[j].layers)
+                {
+                    networks[j].layers[0].Calculate(new double[] { inputs[i] });
+                }
             }
+            population.Enqueue(networks[j], FitnessFunc(inputs, networks[j]));
         }
 
         return population;
@@ -63,20 +67,22 @@ public class SinProj
         Network[] bottom = new Network[top.Length];
         Network[] middle = new Network[population.Count - (top.Length + bottom.Length)];
 
-        for(int i = 0; i < population.Count; i++)
+        int popCount = population.Count;
+
+        for(int i = 0; i < popCount; i ++)
         {
             if(i < top.Length)
             {
                 top[i] = population.Dequeue();
                 continue;
             }
-            else if(i < middle.Length + top.Length - 1)
+            else if(i < middle.Length + top.Length)
             {
                 middle[i - top.Length] = population.Dequeue();
                 continue;
             }
 
-            bottom[i] = population.Dequeue();
+            bottom[i-(top.Length + middle.Length)] = population.Dequeue();
         }
 
         CrossOver(top, middle);
@@ -103,25 +109,21 @@ public class SinProj
                         {
                             middle[w].layers[l].neurons[n].dendrites[d].weight = top[w].layers[l].neurons[n].dendrites[d].weight;
                         }
-                        else
-                        {
-                            top[w].layers[l].neurons[n].dendrites[d].weight = middle[w].layers[l].neurons[n].dendrites[d].weight;
-                        }
                     }
                 }
             }
         }
     }
     
-    public void Train()
+    public double Train(double[] inputs)
     {
-        Random random = new Random();
-        double[] inputs = new double[5];
-        for(int i = 0; i < inputs.Length; i ++)
-        {
-            inputs[i] = (double)random.Next(-1, 1);
-        }
 
         Mutate(inputs);
+        double averageFitness = 0;
+        foreach(Network network in networks)
+        {
+            averageFitness += FitnessFunc(inputs, network);
+        }
+        return averageFitness / networks.Length;
     }
 }

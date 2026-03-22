@@ -41,9 +41,9 @@ public class Neuron
     {
         for(int i = 0; i < dendrites.Length; i++)
         {
-            dendrites[i].weight = random.Next();
+            dendrites[i].weight = random.Next(0, 100);
         }
-        bias = random.Next();
+        bias = random.Next(-1, 1);
     }
 }
 
@@ -55,9 +55,16 @@ public class Layer
     public Layer(ActivationFunc activation, int neuronCount)
     {
         neurons = new Neuron[neuronCount];
-        foreach(Neuron value in neurons)
+        outputs = new double[neuronCount];
+        for(int i = 0; i < neuronCount; i++)
         {
-            value.Activation = activation;
+            neurons[i] = new Neuron();
+            neurons[i].Activation = activation;
+            neurons[i].dendrites = new Dendrite[5];
+            for(int j = 0; j < neurons[i].dendrites.Length; j++)
+            {
+                neurons[i].dendrites[j] = new Dendrite(new Neuron(), neurons[i], 0);
+            }
         }
     }
 
@@ -65,6 +72,7 @@ public class Layer
     {
         for(int i = 0; i < neurons.Length; i ++)
         {
+            neurons[i].Compute();
             outputs[i] = neurons[i].Output;
         }
     }
