@@ -35,13 +35,13 @@ public class Neuron
     public double Output { get; set; }
     public ActivationFunc Activation ;
 
-    public Neuron(ActivationFunc activation, Neuron[] previousNuerons, int dentriteCount)
+    public Neuron(ActivationFunc activation, Neuron[] previousNeurons)
     {
         Activation = activation;
-        dendrites = new Dendrite[dentriteCount];
+        dendrites = new Dendrite[previousNeurons.Length];
         for(int i = 0; i < dendrites.Length; i ++)
         {
-            dendrites[i] = new Dendrite(previousNuerons[i], this, 0);
+            dendrites[i] = new Dendrite(previousNeurons[i], this, 0);
         }
     }
 
@@ -81,7 +81,7 @@ public class Layer
         outputs = new double[neuronCount];
         for(int i = 0; i < neuronCount; i++)
         {
-            neurons[i] = (previousLayer == null) ? new Neuron(activation, new Neuron[0], 0) : new Neuron(activation, previousLayer.neurons, previousLayer.neurons.Length);
+            neurons[i] = (previousLayer == null) ? new Neuron(activation, new Neuron[0]) : new Neuron(activation, previousLayer.neurons);
             neurons[i].Activation = activation;
             for(int j = 0; j < neurons[i].dendrites.Length; j++)
             {
@@ -123,9 +123,15 @@ public class Network
         }
     }
 
-    public void Compute(double inputs[])
+    public void Compute(double[] inputs) 
     {
-        
+        layers[0].outputs = inputs;
+        layers[0].neurons[0].Output = inputs[0];
+        for(int i = 0; i < layers.Length; i++)
+        {
+            layers[i].Calculate();
+        }
+        outputs = layers[^1].outputs;
     }
 }
 
@@ -185,7 +191,7 @@ public class SinProj
                 ActivationFunc acti = new ActivationFunc(ActivationFunc.SinFunc, ActivationFunc.Derivative);
                 if(j == networks[i].layers.Length - 1)
                 {
-                    networks[i].layers[j] = new Layer(acti, networks.Length, networks[i].layers[j - 1]);
+                    networks[i].layers[j] = new Layer(acti, 1, networks[i].layers[j - 1]);
                 }
                 else
                 networks[i].layers[j] = new Layer(acti, networks.Length, networks[i].layers[j - 1]);
@@ -197,12 +203,7 @@ public class SinProj
     public double FitnessFunc(double[] inputs, Network network)
     {
         network.layers[0].neurons[0].Output = inputs[0];
-        for(int i = 1; i < network.layers.Length; i++)
-        {
-            network.layers[i].Calculate();
-            //inputs = network.layers[i].outputs;
-        }
-        network.outputs = network.layers[^1].outputs;
+        network.Compute(inputs);
 
         double average = 0;
 
@@ -223,7 +224,7 @@ public class SinProj
             {
                 foreach(Layer layer in networks[j].layers)
                 {
-                    networks[j].layers[0].Calculate(new double[] { inputs[i] });
+                    networks[j].Compute(new double[] { inputs[i] });
                 }
             }
             population.Enqueue(networks[j], Math.Abs(FitnessFunc(inputs, networks[j])));
@@ -289,7 +290,6 @@ public class SinProj
     
     public double Train(double[] inputs)
     {
-
         Mutate(inputs);
         double averageFitness = 0;
         foreach(Network network in networks)
@@ -304,6 +304,9 @@ public class Game1 : Game
 {
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
+
+
+    bool counter = true;
 
     public double[] results;
     public double[] inputs;
@@ -359,6 +362,7 @@ public class Game1 : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.Black);
+        counter = !counter;
 
         for(int i = 0; i < results.Length; i++)
         {
@@ -368,6 +372,8 @@ public class Game1 : Game
             _spriteBatch.Begin();
             _spriteBatch.DrawRectangle(new Rectangle((int)x, (int)y, 5, 5), Color.White);
             _spriteBatch.DrawRectangle(new Rectangle((int)x, (int)expectedY, 5, 5), Color.Red);
+            Color color = counter ? Color.Green : Color.Blue;
+            _spriteBatch.DrawRectangle(new Rectangle((int)0, (int)0, 30, 30), color);
             _spriteBatch.End();
         }
 
