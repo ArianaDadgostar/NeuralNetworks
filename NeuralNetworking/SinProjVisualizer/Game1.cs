@@ -64,9 +64,9 @@ public class Neuron
     {
         for(int i = 0; i < dendrites.Length; i++)
         {
-            dendrites[i].weight = random.NextDouble() /10;
+            dendrites[i].weight = random.NextDouble();
         }
-        bias = random.Next(0, 1) == 0 ? random.NextDouble() /10 : random.NextDouble()/10;
+        bias = random.Next(0, 1) == 0 ? random.NextDouble() : random.NextDouble() * -1;
     }
 }
 
@@ -127,7 +127,7 @@ public class Network
     {
         layers[0].outputs = inputs;
         layers[0].neurons[0].Output = inputs[0];
-        for(int i = 0; i < layers.Length; i++)
+        for(int i = 1; i < layers.Length; i++)
         {
             layers[i].Calculate();
         }
@@ -154,6 +154,11 @@ public class ActivationFunc
 
     public static double SinFunc(double input)
     {
+        return 1/(1 + Math.Exp(-input));
+    }
+
+    public static double Nothing(double input)
+    {
         return input;
     }
 
@@ -177,6 +182,10 @@ public class ActivationFunc
 public class SinProj
 {
     public Network[] networks;
+    public PriorityQueue<Network, double> population;
+    public Network[] top;
+    public Network[] middle;
+    public Network[] bottom;
 
     public SinProj(int length)
     {
@@ -184,49 +193,46 @@ public class SinProj
         for(int i = 0; i < networks.Length; i ++)
         {
             networks[i] = new Network();
-            networks[i].layers = new Layer[3];
-            networks[i].layers[0] = new Layer(new ActivationFunc(ActivationFunc.SinFunc, ActivationFunc.Derivative), 1, null);
+            networks[i].layers = new Layer[4];
+            networks[i].layers[0] = new Layer(new ActivationFunc(ActivationFunc.Nothing, ActivationFunc.Derivative), 1, null);
             for(int j = 1; j < networks[i].layers.Length; j++)
             {
-                ActivationFunc acti = new ActivationFunc(ActivationFunc.SinFunc, ActivationFunc.Derivative);
+                ActivationFunc acti = new ActivationFunc(ActivationFunc.Nothing, ActivationFunc.Derivative);
                 if(j == networks[i].layers.Length - 1)
                 {
                     networks[i].layers[j] = new Layer(acti, 1, networks[i].layers[j - 1]);
                 }
                 else
-                networks[i].layers[j] = new Layer(acti, networks.Length, networks[i].layers[j - 1]);
+                networks[i].layers[j] = new Layer(acti, 2, networks[i].layers[j - 1]);
                 //(-1 * Math.Abs(j - 1)) + 2
             }
         }
+
+        population = new PriorityQueue<Network, double>();
+        top = new Network[(int)(length * 0.1)];
+        bottom = new Network[top.Length];
+        middle = new Network[length - (top.Length + bottom.Length)];
     }
 
     public double FitnessFunc(double[] inputs, Network network)
     {
-        network.layers[0].neurons[0].Output = inputs[0];
-        network.Compute(inputs);
-
         double average = 0;
 
-        for(int i = 0; i < network.outputs.Length; i ++)
+        for(int i = 0; i < inputs.Length; i ++)
         {
-            double expected = Math.Sin(inputs[i]);
-            average += expected - network.outputs[i];
+            network.Compute(new double[] { inputs[i] });
+            //double expected = Math.Sin(inputs[i]);
+            double expected = inputs[i];
+            average += Math.Abs(expected - network.outputs[0]);
         }
-        return average/network.outputs.Length;
+        return average/inputs.Length;
     }
 
     public PriorityQueue<Network, double> Sort(double[] inputs)
     {
-        PriorityQueue<Network, double> population = new PriorityQueue<Network, double>();
+        population.Clear();
         for(int j = 0; j < networks.Length; j++)
         {
-            for(int i = 0; i < inputs.Length; i++)
-            {
-                foreach(Layer layer in networks[j].layers)
-                {
-                    networks[j].Compute(new double[] { inputs[i] });
-                }
-            }
             population.Enqueue(networks[j], Math.Abs(FitnessFunc(inputs, networks[j])));
         }
 
@@ -235,10 +241,7 @@ public class SinProj
 
     public void Mutate(double[] inputs)
     {
-        PriorityQueue<Network, double> population = Sort(inputs);
-        Network[] top = new Network[(int)(population.Count * 0.1)];
-        Network[] bottom = new Network[top.Length];
-        Network[] middle = new Network[population.Count - (top.Length + bottom.Length)];
+        population = Sort(inputs);
 
         int popCount = population.Count;
 
@@ -331,7 +334,7 @@ public class Game1 : Game
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-        sinProj = new SinProj(10);
+        sinProj = new SinProj(100);
         inputs = new double[sinProj.networks.Length];
         results = new double[inputs.Length];
         Random random = new Random();
@@ -349,10 +352,22 @@ public class Game1 : Game
     {
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
-
-        double result = sinProj.Train(inputs);
-        PriorityQueue<Network, double> population = sinProj.Sort(inputs);
-        results = population.Dequeue().outputs;
+        
+        for(int j = 0; j < 100; j++)
+        {
+            sinProj.Train(inputs);
+            PriorityQueue<Network, double> population = sinProj.Sort(inputs);
+            Network result = population.Dequeue();
+            while(result.layers[1].neurons[0].dendrites[0].weight == 0)
+            {
+                result = population.Dequeue();
+            };
+            for(int i = 0; i < inputs.Length; i++)
+            {
+                result.Compute(new double[] { inputs[i] });
+                results[i] = result.outputs[0];
+            }  
+        }
 
         // TODO: Add your update logic here
 
@@ -363,19 +378,20 @@ public class Game1 : Game
     {
         GraphicsDevice.Clear(Color.Black);
         counter = !counter;
+        _spriteBatch.Begin();
 
         for(int i = 0; i < results.Length; i++)
         {
             float x = (float)(inputs[i] * 400 + 400); // Scale and shift to fit the window
-            float y = (float)(results[i] * 400 + 300); // Scale and invert for drawing
-            float expectedY = (float)(Math.Sin(inputs[i] * 4) * 100 + 300); // Expected output for comparison  
-            _spriteBatch.Begin();
+            float y = (float)(results[i] * 100 + 300); // Scale and invert for drawing
+            //float expectedY = (float)(Math.Sin(inputs[i] * 4) * 100 + 300); // Expected output for comparison  
+            float expectedY = (float)(inputs[i] * 100 + 300); // Expected output for comparison 
             _spriteBatch.DrawRectangle(new Rectangle((int)x, (int)y, 5, 5), Color.White);
             _spriteBatch.DrawRectangle(new Rectangle((int)x, (int)expectedY, 5, 5), Color.Red);
-            Color color = counter ? Color.Green : Color.Blue;
-            _spriteBatch.DrawRectangle(new Rectangle((int)0, (int)0, 30, 30), color);
-            _spriteBatch.End();
         }
+        Color color = counter ? Color.Green : Color.Blue;
+        _spriteBatch.DrawRectangle(new Rectangle((int)0, (int)0, 30, 30), color, thickness: 15);
+        _spriteBatch.End();
 
         // TODO: Add your drawing code here
 
