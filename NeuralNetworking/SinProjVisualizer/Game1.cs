@@ -50,7 +50,6 @@ public class Neuron
         double sum = bias;
         foreach (var d in dendrites)
             sum += d.Compute();
-
         Output = Activation.Compute(sum);
         if(Output != 0)
         {
@@ -146,6 +145,17 @@ public class ActivationFunc
         this.derivative = derivative;
     }
 
+    public static double Normalize(double input)
+    {
+        return input / (2 * Math.PI);
+    }
+
+    public static double UnNormalize(double input)
+    {
+        if(input > 0.5) return (input * 2) - 1;
+        else return input * -2;
+    }
+
     public static double Function(double input)
     {
         if(input > 0) return 1;
@@ -154,7 +164,8 @@ public class ActivationFunc
 
     public static double SinFunc(double input)
     {
-        return 1/(1 + Math.Exp(-input));
+        // return (1/(1 + Math.Exp(-input)));
+        return (Math.Exp(input) - Math.Exp(-input)) / (Math.Exp(input) + Math.Exp(-input));
     }
 
     public static double Nothing(double input)
@@ -194,10 +205,10 @@ public class SinProj
         {
             networks[i] = new Network();
             networks[i].layers = new Layer[4];
-            networks[i].layers[0] = new Layer(new ActivationFunc(ActivationFunc.Nothing, ActivationFunc.Derivative), 1, null);
+            networks[i].layers[0] = new Layer(new ActivationFunc(ActivationFunc.SinFunc, ActivationFunc.Derivative), 1, null);
             for(int j = 1; j < networks[i].layers.Length; j++)
             {
-                ActivationFunc acti = new ActivationFunc(ActivationFunc.Nothing, ActivationFunc.Derivative);
+                ActivationFunc acti = new ActivationFunc(ActivationFunc.SinFunc, ActivationFunc.Derivative);
                 if(j == networks[i].layers.Length - 1)
                 {
                     networks[i].layers[j] = new Layer(acti, 1, networks[i].layers[j - 1]);
@@ -221,9 +232,9 @@ public class SinProj
         for(int i = 0; i < inputs.Length; i ++)
         {
             network.Compute(new double[] { inputs[i] });
-            //double expected = Math.Sin(inputs[i]);
-            double expected = inputs[i];
-            average += Math.Abs(expected - network.outputs[0]);
+            double expected = Math.Sin(inputs[i]);
+            //double expected = inputs[i];
+            average += Math.Abs(expected - ActivationFunc.UnNormalize(network.outputs[0]));
         }
         return average/inputs.Length;
     }
@@ -341,6 +352,8 @@ public class Game1 : Game
         for(int i = 0; i < inputs.Length; i ++)
         {  
             inputs[i] = (double)random.NextDouble();
+            inputs[i] *= 2 * Math.PI;
+            ActivationFunc.Normalize(inputs[i]);
         }
 
         //font = Content.Load<SpriteFont>("Arial");
@@ -366,6 +379,7 @@ public class Game1 : Game
             {
                 result.Compute(new double[] { inputs[i] });
                 results[i] = result.outputs[0];
+                results[i] = ActivationFunc.UnNormalize(results[i]);
             }  
         }
 
@@ -384,8 +398,8 @@ public class Game1 : Game
         {
             float x = (float)(inputs[i] * 400 + 400); // Scale and shift to fit the window
             float y = (float)(results[i] * 100 + 300); // Scale and invert for drawing
-            //float expectedY = (float)(Math.Sin(inputs[i] * 4) * 100 + 300); // Expected output for comparison  
-            float expectedY = (float)(inputs[i] * 100 + 300); // Expected output for comparison 
+            float expectedY = (float)(Math.Sin(inputs[i] * 2 * Math.PI) * 100 + 300); // Expected output for comparison  
+            //float expectedY = (float)(inputs[i] * 100 + 300); // Expected output for comparison 
             _spriteBatch.DrawRectangle(new Rectangle((int)x, (int)y, 5, 5), Color.White);
             _spriteBatch.DrawRectangle(new Rectangle((int)x, (int)expectedY, 5, 5), Color.Red);
         }
