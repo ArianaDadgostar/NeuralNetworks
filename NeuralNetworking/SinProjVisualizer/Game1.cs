@@ -64,6 +64,8 @@ public class Neuron
         for(int i = 0; i < dendrites.Length; i++)
         {
             dendrites[i].weight = random.NextDouble();
+            // dendrites[i].weight = -1;
+            ;
         }
         bias = random.Next(0, 1) == 0 ? random.NextDouble() : random.NextDouble() * -1;
     }
@@ -147,13 +149,14 @@ public class ActivationFunc
 
     public static double Normalize(double input)
     {
-        return input / (2 * Math.PI);
+        return (input + Math.PI) / (Math.PI + Math.PI);
     }
 
     public static double UnNormalize(double input)
     {
-        if(input > 0.5) return (input * 2) - 1;
-        else return input * -2;
+        return (input * 2) - 1;
+        // if(input > 0.5) return (input * 2) - 1;
+        // else return input * -2;
     }
 
     public static double Function(double input)
@@ -165,8 +168,14 @@ public class ActivationFunc
     public static double SinFunc(double input)
     {
         // return (1/(1 + Math.Exp(-input)));
-        return (Math.Exp(input) - Math.Exp(-input)) / (Math.Exp(input) + Math.Exp(-input));
+        double result = (Math.Exp(input) - Math.Exp(-input)) / (Math.Exp(input) + Math.Exp(-input));
+        return result;
     }
+
+    // public static double QuadraticNormalization(double input)
+    // {
+    //     return (input - 
+    // }
 
     public static double Nothing(double input)
     {
@@ -232,9 +241,10 @@ public class SinProj
         for(int i = 0; i < inputs.Length; i ++)
         {
             network.Compute(new double[] { inputs[i] });
-            double expected = Math.Sin(inputs[i]);
-            //double expected = inputs[i];
+            double expected = Math.Sin(inputs[i] * 2 * Math.PI);
+            //double expected = inputs[i] * 2;
             average += Math.Abs(expected - ActivationFunc.UnNormalize(network.outputs[0]));
+            // average += Math.Abs(expected - network.outputs[0]);
         }
         return average/inputs.Length;
     }
@@ -351,8 +361,8 @@ public class Game1 : Game
         Random random = new Random();
         for(int i = 0; i < inputs.Length; i ++)
         {  
-            inputs[i] = (double)random.NextDouble();
-            inputs[i] *= 2 * Math.PI;
+            inputs[i] = (random.Next(0, 10) % 2 == 0) ? (double)random.NextDouble() : (double)random.NextDouble() * -1;
+            inputs[i] *= Math.PI;
             ActivationFunc.Normalize(inputs[i]);
         }
 
@@ -396,10 +406,10 @@ public class Game1 : Game
 
         for(int i = 0; i < results.Length; i++)
         {
-            float x = (float)(inputs[i] * 400 + 400); // Scale and shift to fit the window
-            float y = (float)(results[i] * 100 + 300); // Scale and invert for drawing
-            float expectedY = (float)(Math.Sin(inputs[i] * 2 * Math.PI) * 100 + 300); // Expected output for comparison  
-            //float expectedY = (float)(inputs[i] * 100 + 300); // Expected output for comparison 
+            float x = (float)(inputs[i] * 300 + 100); // Scale and shift to fit the window
+            float y = (float)(results[i] * 100 + 100); // Scale and invert for drawing
+            float expectedY = (float)(Math.Sin(inputs[i] * 2 * Math.PI) * 100 + 100); // Expected output for comparison  
+            //float expectedY = (float)(1 * 200 + 100); // Expected output for comparison 
             _spriteBatch.DrawRectangle(new Rectangle((int)x, (int)y, 5, 5), Color.White);
             _spriteBatch.DrawRectangle(new Rectangle((int)x, (int)expectedY, 5, 5), Color.Red);
         }
