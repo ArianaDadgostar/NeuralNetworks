@@ -147,14 +147,22 @@ public class ActivationFunc
         this.derivative = derivative;
     }
 
-    public static double Normalize(double input)
+    public static double XNormalize(double input)
     {
         return (input + Math.PI) / (Math.PI + Math.PI);
     }
 
+    public static double YNormalize(double input)
+    {
+        return (input + (2 * Math.PI)) / (4 * Math.PI);
+    }
+
     public static double UnNormalize(double input)
     {
-        return (input * 2) - 1;
+        return (input * 4 * Math.PI) - (2 * Math.PI);
+        //return (input * 2) - 1;
+
+
         // if(input > 0.5) return (input * 2) - 1;
         // else return input * -2;
     }
@@ -168,8 +176,9 @@ public class ActivationFunc
     public static double SinFunc(double input)
     {
         // return (1/(1 + Math.Exp(-input)));
-        double result = (Math.Exp(input) - Math.Exp(-input)) / (Math.Exp(input) + Math.Exp(-input));
-        return result;
+        //double result = (Math.Exp(input) - Math.Exp(-input)) / (Math.Exp(input) + Math.Exp(-input));
+        if(input <= 0) return 0;
+        return input;
     }
 
     // public static double QuadraticNormalization(double input)
@@ -241,9 +250,9 @@ public class SinProj
         for(int i = 0; i < inputs.Length; i ++)
         {
             network.Compute(new double[] { inputs[i] });
-            double expected = Math.Sin(inputs[i] * 2 * Math.PI);
-            //double expected = inputs[i] * 2;
-            average += Math.Abs(expected - ActivationFunc.UnNormalize(network.outputs[0]));
+            //double expected = Math.Sin(inputs[i] * 2 * Math.PI);
+            double expected = ActivationFunc.YNormalize(Game1.TargetFunction(inputs[i]));
+            average += Math.Abs(expected - network.outputs[0]);
             // average += Math.Abs(expected - network.outputs[0]);
         }
         return average/inputs.Length;
@@ -363,12 +372,17 @@ public class Game1 : Game
         {  
             inputs[i] = (random.Next(0, 10) % 2 == 0) ? (double)random.NextDouble() : (double)random.NextDouble() * -1;
             inputs[i] *= Math.PI;
-            ActivationFunc.Normalize(inputs[i]);
+            inputs[i] = ActivationFunc.XNormalize(inputs[i]);
         }
 
         //font = Content.Load<SpriteFont>("Arial");
 
         // TODO: use this.Content to load your game content here
+    }
+
+    public static float TargetFunction(double input)
+    {
+        return (float)(input * 2);
     }
 
     protected override void Update(GameTime gameTime)
@@ -406,10 +420,10 @@ public class Game1 : Game
 
         for(int i = 0; i < results.Length; i++)
         {
-            float x = (float)(inputs[i] * 300 + 100); // Scale and shift to fit the window
-            float y = (float)(results[i] * 100 + 100); // Scale and invert for drawing
-            float expectedY = (float)(Math.Sin(inputs[i] * 2 * Math.PI) * 100 + 100); // Expected output for comparison  
-            //float expectedY = (float)(1 * 200 + 100); // Expected output for comparison 
+            float x = (float)(inputs[i] * 300); // Scale and shift to fit the window
+            float y = (float)(results[i] * 100); // Scale and invert for drawing
+            //float expectedY = (float)(Math.Sin(inputs[i] * 2 * Math.PI) * 100 + 100); // Expected output for comparison  
+            float expectedY = (float)(TargetFunction(inputs[i]) * 100); // Expected output for comparison 
             _spriteBatch.DrawRectangle(new Rectangle((int)x, (int)y, 5, 5), Color.White);
             _spriteBatch.DrawRectangle(new Rectangle((int)x, (int)expectedY, 5, 5), Color.Red);
         }
