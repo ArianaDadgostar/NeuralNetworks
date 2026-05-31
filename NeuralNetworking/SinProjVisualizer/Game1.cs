@@ -154,17 +154,17 @@ public class ActivationFunc
 
     public static double YNormalize(double input)
     {
-        return (input + (2 * Math.PI)) / (4 * Math.PI);
+        return (input + 1) / 2;
     }
 
-    public static double UnNormalize(double input)
+    public static double UnNormalizeY(double input)
     {
-        return (input * 4 * Math.PI) - (2 * Math.PI);
-        //return (input * 2) - 1;
+        return (input * 2) - 1;
+    }
 
-
-        // if(input > 0.5) return (input * 2) - 1;
-        // else return input * -2;
+    public static double UnNormalizeX(double input)
+    {
+        return (input * 2 * Math.PI) - Math.PI;
     }
 
     public static double Function(double input)
@@ -176,9 +176,8 @@ public class ActivationFunc
     public static double SinFunc(double input)
     {
         // return (1/(1 + Math.Exp(-input)));
-        //double result = (Math.Exp(input) - Math.Exp(-input)) / (Math.Exp(input) + Math.Exp(-input));
-        if(input <= 0) return 0;
-        return input;
+        double result = (Math.Exp(input) - Math.Exp(-input)) / (Math.Exp(input) + Math.Exp(-input));
+        return result;
     }
 
     // public static double QuadraticNormalization(double input)
@@ -250,10 +249,8 @@ public class SinProj
         for(int i = 0; i < inputs.Length; i ++)
         {
             network.Compute(new double[] { inputs[i] });
-            //double expected = Math.Sin(inputs[i] * 2 * Math.PI);
-            double expected = ActivationFunc.YNormalize(Game1.TargetFunction(inputs[i]));
+            double expected = ActivationFunc.YNormalize(Game1.TargetFunction(ActivationFunc.UnNormalizeX(inputs[i])));
             average += Math.Abs(expected - network.outputs[0]);
-            // average += Math.Abs(expected - network.outputs[0]);
         }
         return average/inputs.Length;
     }
@@ -380,9 +377,9 @@ public class Game1 : Game
         // TODO: use this.Content to load your game content here
     }
 
-    public static float TargetFunction(double input)
+    public static double TargetFunction(double input)
     {
-        return (float)(input * 2);
+        return Math.Sin(input);
     }
 
     protected override void Update(GameTime gameTime)
@@ -390,8 +387,8 @@ public class Game1 : Game
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
         
-        for(int j = 0; j < 100; j++)
-        {
+        // for(int j = 0; j < 100; j++)
+        // {
             sinProj.Train(inputs);
             PriorityQueue<Network, double> population = sinProj.Sort(inputs);
             Network result = population.Dequeue();
@@ -403,9 +400,9 @@ public class Game1 : Game
             {
                 result.Compute(new double[] { inputs[i] });
                 results[i] = result.outputs[0];
-                results[i] = ActivationFunc.UnNormalize(results[i]);
+                results[i] = ActivationFunc.UnNormalizeY(results[i]);
             }  
-        }
+        // }
 
         // TODO: Add your update logic here
 
@@ -420,10 +417,9 @@ public class Game1 : Game
 
         for(int i = 0; i < results.Length; i++)
         {
-            float x = (float)(inputs[i] * 300); // Scale and shift to fit the window
-            float y = (float)(results[i] * 100); // Scale and invert for drawing
-            //float expectedY = (float)(Math.Sin(inputs[i] * 2 * Math.PI) * 100 + 100); // Expected output for comparison  
-            float expectedY = (float)(TargetFunction(inputs[i]) * 100); // Expected output for comparison 
+            float x = (float)(inputs[i] * 300 + 300);
+            float y = (float)(results[i] * 100 + 300);
+            float expectedY = (float)(TargetFunction(ActivationFunc.UnNormalizeX(inputs[i])) * 100 + 300);
             _spriteBatch.DrawRectangle(new Rectangle((int)x, (int)y, 5, 5), Color.White);
             _spriteBatch.DrawRectangle(new Rectangle((int)x, (int)expectedY, 5, 5), Color.Red);
         }
