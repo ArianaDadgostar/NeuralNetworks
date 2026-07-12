@@ -57,7 +57,7 @@ public class Neuron
         }
         return Output;
     }
-
+ 
 
     public void Randomize(Random random)
     {
@@ -419,7 +419,7 @@ public class Game1 : Game
         {
             float x = (float)(inputs[i] * 300 + 300);
             float y = (float)(results[i] * 100 + 300);
-            float expectedY = (float)(TargetFunction(ActivationFunc.UnNormalizeX(inputs[i])) * 100 + 300);
+            float expectedY = (float)(ActivationFunc.YNormalize(TargetFunction(ActivationFunc.UnNormalizeX(inputs[i]))) * 100 + 300);
             _spriteBatch.DrawRectangle(new Rectangle((int)x, (int)y, 5, 5), Color.White);
             _spriteBatch.DrawRectangle(new Rectangle((int)x, (int)expectedY, 5, 5), Color.Red);
         }
