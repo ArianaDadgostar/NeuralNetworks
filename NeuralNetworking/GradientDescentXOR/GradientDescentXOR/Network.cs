@@ -22,9 +22,18 @@ namespace Program
             {
                 neuron.Delta = Program.ErrorFuncDerivative(this, desiredOutputs);
                 neuron.BiasUpdate = neuron.Delta * neuron.Activation.derivative(neuron.Input);
+                foreach(Dendrite dendrite in neuron.dendrites)
+                {
+                    Neuron previous = dendrite.previous;
+                    if(previous == null) continue;
+
+                    previous.Delta += neuron.Delta * neuron.Activation.derivative(neuron.Input) * dendrite.weight; // SOMETHING IS SETTING DELTA TO 0 7/11/26
+                    dendrite.weightUpdate = neuron.Delta * neuron.Activation.derivative(neuron.Input) * learningRate;
+                }
+
                 neuron.Delta = 0;
             }
-            for(int i = layers.Length - 1; i >= 0; i--)
+            for(int i = layers.Length - 2; i >= 0; i--)
             {
                 layers[i].Backpropogate(learningRate);
             }

@@ -67,7 +67,7 @@ namespace Program
             Network network = new Network();
             Setup(network);
             
-            const double learningRate = 0.000001;
+            const double learningRate = 0.0001;
 
             double[][] inputs =
             {

@@ -38,9 +38,9 @@ namespace Program
                 if(previous == null) continue;
 
                 previous.Delta += Delta * Activation.derivative(Input) * dendrite.weight;
-                previous.BiasUpdate += previous.Delta * Activation.derivative(Input);
-                dendrite.weightUpdate += previous.Delta * Activation.derivative(Input) * learningRate;
+                dendrite.weightUpdate = Delta * Activation.derivative(Input) * learningRate;
             }
+            BiasUpdate = Delta * Activation.derivative(Input);
 
             Delta = 0;
         }

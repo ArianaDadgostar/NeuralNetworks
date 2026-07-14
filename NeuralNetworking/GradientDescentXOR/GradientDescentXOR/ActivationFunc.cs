@@ -13,11 +13,11 @@ namespace Program
 
         public static double Function(double input)
         {
-            // double posE = Math.Pow(Math.E, input);
-            // double negE = Math.Pow(Math.E, -1 * input);
+            double posE = Math.Pow(Math.E, input);
+            double negE = Math.Pow(Math.E, -1 * input);
 
-            // return (posE - negE) / (negE + posE);
-            return input;
+            return (posE - negE) / (negE + posE);
+            //return input;
         }
 
         public static double Nothing(double input)
