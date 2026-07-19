@@ -18,17 +18,19 @@ namespace Program
 
         public void Backpropogate(double learningRate, double[] desiredOutputs)
         {
-            foreach(Neuron neuron in layers[^1].neurons)
+            for(int i = 0; i < layers[^1].neurons.Length; i++)
             {
-                neuron.Delta = Program.ErrorFuncDerivative(this, desiredOutputs);
-                neuron.BiasUpdate = neuron.Delta * neuron.Activation.derivative(neuron.Input);
+                Neuron neuron = layers[^1].neurons[i];
+                double input = neuron.ComputeNoActivation();
+                neuron.Delta = Program.ErrorFuncDerivative(neuron.Output, desiredOutputs[i]);
+                neuron.BiasUpdate = neuron.Delta * neuron.Activation.derivative(input) * learningRate;
                 foreach(Dendrite dendrite in neuron.dendrites)
                 {
                     Neuron previous = dendrite.previous;
-                    if(previous == null) continue;
+                    if(previous is null) continue;
 
-                    previous.Delta += neuron.Delta * neuron.Activation.derivative(neuron.Input) * dendrite.weight; // SOMETHING IS SETTING DELTA TO 0 7/11/26
-                    dendrite.weightUpdate = neuron.Delta * neuron.Activation.derivative(neuron.Input) * learningRate;
+                    previous.Delta += neuron.Delta * neuron.Activation.derivative(input) * dendrite.weight;
+                    dendrite.weightUpdate += neuron.Delta * neuron.Activation.derivative(input) * previous.Output * learningRate;
                 }
 
                 neuron.Delta = 0;
@@ -64,7 +66,12 @@ namespace Program
         public void Compute(double[] inputs) 
         {
             layers[0].outputs = inputs;
-            layers[0].neurons[0].Output = inputs[0];
+
+            for(int i = 0; i < layers[0].neurons.Length; i++)
+            {
+                layers[0].neurons[i].Output = inputs[i];
+            }
+            
             for(int i = 1; i < layers.Length; i++)
             {
                 layers[i].Calculate();

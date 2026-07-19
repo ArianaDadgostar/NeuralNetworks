@@ -20,14 +20,10 @@ namespace Program
             return error;
         }
 
-        public static double ErrorFuncDerivative(Network network, double[] desiredOutputs)
+        public static double ErrorFuncDerivative(double output, double desiredOutput)
         {
-            double error = 0;
-            for(int i = 0; i < desiredOutputs.Length; i++)
-            {
-                error += network.outputs[i] - desiredOutputs[i];
-                error *= 2;
-            }
+            double error = output - desiredOutput;
+            error *= 2;
             return error;
         }
 
@@ -67,7 +63,7 @@ namespace Program
             Network network = new Network();
             Setup(network);
             
-            const double learningRate = 0.0001;
+            const double learningRate = 0.01;
 
             double[][] inputs =
             {

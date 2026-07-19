@@ -26,23 +26,32 @@ namespace Program
             {
                 dendrite.ApplyUpdates();
             }
-            bias += BiasUpdate;
+            bias -= BiasUpdate;
             BiasUpdate = 0;
         }
 
         public void Backpropogate(double learningRate)
         {
+            double input = ComputeNoActivation();
             foreach(Dendrite dendrite in dendrites)
             {
                 Neuron previous = dendrite.previous;
                 if(previous == null) continue;
 
-                previous.Delta += Delta * Activation.derivative(Input) * dendrite.weight;
-                dendrite.weightUpdate = Delta * Activation.derivative(Input) * learningRate;
+                previous.Delta += Delta * Activation.derivative(input) * dendrite.weight;
+                dendrite.weightUpdate += Delta * Activation.derivative(input) * previous.Output * learningRate;
             }
-            BiasUpdate = Delta * Activation.derivative(Input);
+            BiasUpdate = Delta * Activation.derivative(input) * learningRate;
 
             Delta = 0;
+        }
+
+        public double ComputeNoActivation()
+        {
+            double sum = bias;
+            foreach (var d in dendrites)
+                sum += d.Compute();
+            return sum;
         }
 
         public double Compute()
@@ -51,10 +60,6 @@ namespace Program
             foreach (var d in dendrites)
                 sum += d.Compute();
             Output = Activation.Compute(sum);
-            if(Output != 0)
-            {
-                ;
-            }
             return Output;
         }
     
@@ -64,8 +69,6 @@ namespace Program
             for(int i = 0; i < dendrites.Length; i++)
             {
                 dendrites[i].weight = random.NextDouble();
-                // dendrites[i].weight = -1;
-                ;
             }
             bias = random.Next(0, 1) == 0 ? random.NextDouble() : random.NextDouble() * -1;
         }

@@ -17,7 +17,7 @@ namespace Program
             double negE = Math.Pow(Math.E, -1 * input);
 
             return (posE - negE) / (negE + posE);
-            //return input;
+            // return input;
         }
 
         public static double Nothing(double input)
@@ -32,7 +32,7 @@ namespace Program
 
         public static double Derivative(double input)
         {
-            return 1 - Math.Pow(Function(input), 2);
+           return 1 - Math.Pow(Function(input), 2);
         }
     }
 }

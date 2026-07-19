@@ -17,7 +17,7 @@ namespace Program
 
         public void ApplyUpdates()
         {
-            weight += weightUpdate;
+            weight -= weightUpdate;
             weightUpdate = 0;
         }
 
