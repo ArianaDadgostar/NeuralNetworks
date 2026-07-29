@@ -8,6 +8,7 @@ namespace MiniMaxTicTacToe;
 
 public class TicTacToe : Game
 {
+    #region Definitions
     private GraphicsDeviceManager _graphics;
     private SpriteBatch spriteBatch;
 
@@ -22,39 +23,7 @@ public class TicTacToe : Game
 
     Square[][] board;
 
-    public enum CellState
-    {
-        X,
-        O,
-        None
-    };
-
-    public class Square
-    {
-        public CellState state { get; set; }
-        public int minX;
-        public int maxX;
-        public int minY;
-        public int maxY;
-
-        public Square(int minX, int maxX, int minY, int maxY)
-        {
-            this.minX = minX;
-            this.maxX = maxX;
-            this.minY = minY;
-            this.maxY = maxY;
-            state = CellState.None;
-        }
-
-        public bool IsWithinSquare(int x, int y)
-        {
-            if(x > maxX || x < minX) return false;
-
-            if(y > maxY || y < minY) return false;
-
-            return true;
-        }
-    }
+    #endregion
 
     public TicTacToe()
     {
@@ -70,10 +39,10 @@ public class TicTacToe : Game
         base.Initialize();
     }
 
-    protected override void LoadContent()
-    {
-        spriteBatch = new SpriteBatch(GraphicsDevice);
+    #region GraphicDefinitions
 
+    void DefineTextures()
+    {
         line = new Texture2D(GraphicsDevice, 1, 1);
         line.SetData(new Color[] { Color.White });
 
@@ -82,7 +51,10 @@ public class TicTacToe : Game
 
         circle = new Texture2D(GraphicsDevice, 1, 1);
         circle.SetData(new Color[] { Color.Green });
+    }
 
+    void DefineBoard()
+    {
         board = new Square[3][];
         for(int i = 0; i < board.Length; i ++)
         {
@@ -95,6 +67,16 @@ public class TicTacToe : Game
                                          (j + 1) * Dimensions.offset + Dimensions.yMin);
             }
         }
+    }
+
+    #endregion 
+
+    protected override void LoadContent()
+    {
+        spriteBatch = new SpriteBatch(GraphicsDevice);
+
+        DefineTextures();
+        DefineBoard();
 
         // TODO: use this.Content to load your game content here
     }
