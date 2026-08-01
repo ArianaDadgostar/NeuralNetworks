@@ -81,7 +81,7 @@ public class TicTacToe : Game
 
         DefineTextures();
         DefineBoard();
-        tree = new(false, board);
+        tree = new(true, board);
 
         board = SetBoard(board);
 
@@ -108,12 +108,18 @@ public class TicTacToe : Game
 
     public Square[][] SetBoard(Square[][] board)
     {
-        board[0][0].state = CellState.X;
-        board[1][0].state = CellState.X;
-        board[0][1].state = CellState.O;
-        board[1][1].state = CellState.O;
-        board[0][2].state = CellState.X;
+        board[0][0].state = CellState.O;
+        tree.TravelDownTree(board[0][0]);
+        board[0][1].state = CellState.X;
+        tree.TravelDownTree(board[0][1]);
+        board[1][0].state = CellState.O;
+        tree.TravelDownTree(board[1][0]);
+        board[1][1].state = CellState.X;
+        tree.TravelDownTree(board[1][1]);
         board[1][2].state = CellState.O;
+        tree.TravelDownTree(board[1][2]);
+        board[0][2].state = CellState.X;
+        tree.TravelDownTree(board[0][2]);
         return board;
     }
 
@@ -132,7 +138,7 @@ public class TicTacToe : Game
         chosen.state = isCross ? CellState.X : CellState.O;
         isCross = !isCross;
 
-        board = tree.TravelDownTree(chosen);
+        board = tree.DefineNextMove(chosen);
         isCross = !isCross;
         
         base.Update(gameTime);

@@ -23,6 +23,7 @@ public class TicTacToeNode : IGameState<TicTacToeNode>
     public bool IsTie { get; set; }
     public bool IsTerminal { get; set; }
     public Square[][] Board { get; set; }
+    public Square change { get; set; }
     public TicTacToeNode[] Children;
 
     public bool IsCross { get; set; }
@@ -110,6 +111,7 @@ public class TicTacToeNode : IGameState<TicTacToeNode>
                 }
 
                 node.Board[i][j].state = isCross ? CellState.X : CellState.O;
+                node.change = node.Board[i][j];
                 node = DefineTree(node, !isCross);
                 children.Add(node);
             }
@@ -162,16 +164,17 @@ public class TicTacToeTree
                 head.Board[i][j].state = board[i][j].state;
             }
         }
-        head = TicTacToeNode.DefineTree(head, isCross);
+        head = TicTacToeNode.DefineTree(head, !isCross);
         isMaximizer = isCross;
         current = head;
     }
 
-    public Square[][] TravelDownTree(Square chosen)
+    public Square[][] DefineNextMove(Square chosen)
     {
+        if(current.IsTerminal) return current.Board;
         foreach(TicTacToeNode child in current.Children)
         {
-            if(!child.Contains(chosen)) continue;
+            if(child.change.maxX != chosen.maxX || child.change.maxY != chosen.maxY) continue;
 
             current = child;
             if(current.IsTerminal) return current.Board;
@@ -181,6 +184,18 @@ public class TicTacToeTree
                 if(grandchild.IsLoss && !isMaximizer) current = grandchild;
                 else if(grandchild.IsTie && current == child) current = grandchild;
             }
+        }
+        return current.Board;
+    }
+    
+    public Square[][] TravelDownTree(Square chosen)
+    {
+        if(current.IsTerminal) return current.Board;
+        foreach(TicTacToeNode child in current.Children)
+        {
+            if(child.change.maxX != chosen.maxX || child.change.maxY != chosen.maxY) continue;
+
+            current = child;
         }
         return current.Board;
     }
