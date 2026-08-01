@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Data;
+using System.Reflection.Metadata;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Security.Principal;
@@ -23,6 +24,7 @@ public class TicTacToeNode : IGameState<TicTacToeNode>
     public bool IsTerminal { get; set; }
     public Square[][] Board { get; set; }
     public TicTacToeNode[] Children;
+
     public bool IsCross { get; set; }
 
     private static readonly int[][] Lines = new int[][]
@@ -58,11 +60,11 @@ public class TicTacToeNode : IGameState<TicTacToeNode>
         foreach (var line in Lines)
         {
             row = line[0]/3;
-            CellState a = current.Board[row][line[0] - row].state;
+            CellState a = current.Board[row][line[0] - (row*3)].state;
             row = line[1]/3;
-            CellState b = current.Board[row][line[1] - row].state;
+            CellState b = current.Board[row][line[1] - (row*3)].state;
             row = line[2]/3;
-            CellState c = current.Board[row][line[2] - row].state;
+            CellState c = current.Board[row][line[2] - (row*3)].state;
 
             if (a == CellState.None || a != b || b != c) continue;
 
@@ -96,7 +98,16 @@ public class TicTacToeNode : IGameState<TicTacToeNode>
                 if(current.Board[i][j].state != CellState.None) continue;
 
                 TicTacToeNode node = new();
-                current.Board = (Square[][])current.Board.Clone();
+                node.Board = new Square[3][];
+                for(int k = 0; k < current.Board.Length; k++)
+                {
+                    node.Board[k] = new Square[3];
+                    for(int l = 0; l < current.Board[k].Length; l++)
+                    {
+                        node.Board[k][l] = new Square(current.Board[k][l].minX, current.Board[k][l].maxX, current.Board[k][l].minY, current.Board[k][l].maxY);
+                        node.Board[k][l].state = current.Board[k][l].state;
+                    }
+                }
 
                 node.Board[i][j].state = isCross ? CellState.X : CellState.O;
                 node = DefineTree(node, !isCross);
@@ -104,18 +115,73 @@ public class TicTacToeNode : IGameState<TicTacToeNode>
             }
         }
 
+        for(int i = 0; i < children.Count; i++)
+        {
+            if(children[i].IsWin && isCross) current.IsWin = true;
+            if(children[i].IsLoss && !isCross) current.IsLoss = true;
+            if(!current.IsWin && !current.IsLoss && children[i].IsTie) current.IsTie = true;
+        }
+
         current.Children = children.ToArray();
         return current;
+    }
+
+    public bool Contains(Square possible)
+    {
+        for(int i = 0; i < Board.Length; i++)
+        {
+            for(int j = 0; j < Board[i].Length; j++)
+            {
+                if(possible.state != Board[i][j].state) continue;
+                if(possible.minX != Board[i][j].minX || possible.maxX != Board[i][j].maxX) continue;
+                if(possible.minY != Board[i][j].minY || possible.maxY != Board[i][j].maxY) continue;
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 
 public class TicTacToeTree
 {
     TicTacToeNode head;
+    TicTacToeNode current;
+    bool isMaximizer;
 
-    public TicTacToeTree(bool isCross)
+    public TicTacToeTree(bool isCross, Square[][] board)
     {
         head = new TicTacToeNode();
+        head.Board = new Square[3][];
+        for(int i = 0; i < board.Length; i++)
+        {
+            head.Board[i] = new Square[3];
+            for(int j = 0; j < board[i].Length; j++)
+            {
+                head.Board[i][j] = new Square(board[i][j].minX, board[i][j].maxX, board[i][j].minY, board[i][j].maxY);
+                head.Board[i][j].state = board[i][j].state;
+            }
+        }
         head = TicTacToeNode.DefineTree(head, isCross);
+        isMaximizer = isCross;
+        current = head;
+    }
+
+    public Square[][] TravelDownTree(Square chosen)
+    {
+        foreach(TicTacToeNode child in current.Children)
+        {
+            if(!child.Contains(chosen)) continue;
+
+            current = child;
+            if(current.IsTerminal) return current.Board;
+            foreach(TicTacToeNode grandchild in current.Children)
+            {
+                if(grandchild.IsWin && isMaximizer) current = grandchild;
+                if(grandchild.IsLoss && !isMaximizer) current = grandchild;
+                else if(grandchild.IsTie && current == child) current = grandchild;
+            }
+        }
+        return current.Board;
     }
 }

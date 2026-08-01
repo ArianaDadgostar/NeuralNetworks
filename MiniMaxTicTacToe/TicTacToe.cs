@@ -23,6 +23,8 @@ public class TicTacToe : Game
 
     Square[][] board;
 
+    TicTacToeTree tree;
+
     #endregion
 
     public TicTacToe()
@@ -75,8 +77,13 @@ public class TicTacToe : Game
     {
         spriteBatch = new SpriteBatch(GraphicsDevice);
 
+        isCross = false;
+
         DefineTextures();
         DefineBoard();
+        tree = new(false, board);
+
+        board = SetBoard(board);
 
         // TODO: use this.Content to load your game content here
     }
@@ -99,6 +106,17 @@ public class TicTacToe : Game
         return null;
     }
 
+    public Square[][] SetBoard(Square[][] board)
+    {
+        board[0][0].state = CellState.X;
+        board[1][0].state = CellState.X;
+        board[0][1].state = CellState.O;
+        board[1][1].state = CellState.O;
+        board[0][2].state = CellState.X;
+        board[1][2].state = CellState.O;
+        return board;
+    }
+
     protected override void Update(GameTime gameTime)
     {
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -106,12 +124,15 @@ public class TicTacToe : Game
 
         // TODO: Add your update logic here
 
-        if(Mouse.GetState().LeftButton != ButtonState.Pressed) return;
+        if(Mouse.GetState().LeftButton != ButtonState.Pressed || isCross) return; // CHANGE TO ALLOW USER TO PLAY AS CROSS OR CIRCLE 
 
         Square chosen = SquareSelected();
         if(chosen == null || chosen.state != CellState.None) return;
 
         chosen.state = isCross ? CellState.X : CellState.O;
+        isCross = !isCross;
+
+        board = tree.TravelDownTree(chosen);
         isCross = !isCross;
         
         base.Update(gameTime);
