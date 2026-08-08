@@ -83,8 +83,6 @@ public class TicTacToe : Game
         DefineBoard();
         tree = new(true, board);
 
-        //board = SetBoard(board);
-
         // TODO: use this.Content to load your game content here
     }
 
@@ -104,23 +102,6 @@ public class TicTacToe : Game
         }
 
         return null;
-    }
-
-    public Square[][] SetBoard(Square[][] board)
-    {
-        board[0][0].state = CellState.O;
-        tree.TravelDownTree(board[0][0]);
-        board[0][1].state = CellState.X;
-        tree.TravelDownTree(board[0][1]);
-        board[1][0].state = CellState.O;
-        tree.TravelDownTree(board[1][0]);
-        board[1][1].state = CellState.X;
-        tree.TravelDownTree(board[1][1]);
-        board[1][2].state = CellState.O;
-        tree.TravelDownTree(board[1][2]);
-        board[0][2].state = CellState.X;
-        tree.TravelDownTree(board[0][2]);
-        return board;
     }
 
     protected override void Update(GameTime gameTime)
