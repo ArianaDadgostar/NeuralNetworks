@@ -9,18 +9,14 @@ namespace MiniMaxTicTacToe;
 
 public interface IGameState<T> where T : IGameState<T>
 {
-    bool IsWin { get; }
-    bool IsLoss { get; }
-    bool IsTie { get; }
+    int value { get; set; }
     bool IsTerminal { get; }
     T[] GetChildren();
 }
 
 public class TicTacToeNode : IGameState<TicTacToeNode>
 {
-    public bool IsWin { get; set; }
-    public bool IsLoss { get; set; }
-    public bool IsTie { get; set; }
+    public int value { get; set; }
     public bool IsTerminal { get; set; }
     public Square[][] Board { get; set; }
     public Square change { get; set; }
@@ -58,6 +54,7 @@ public class TicTacToeNode : IGameState<TicTacToeNode>
     public static TicTacToeNode EvaluateNode(TicTacToeNode current, bool isCross)
     {
         int row;
+
         foreach (var line in Lines)
         {
             row = line[0]/3;
@@ -70,18 +67,14 @@ public class TicTacToeNode : IGameState<TicTacToeNode>
             if (a == CellState.None || a != b || b != c) continue;
 
             current.IsTerminal = true;
-            current.IsWin = (a == CellState.X) ? true : false;
-            current.IsLoss = !current.IsWin;
-            current.IsTie = false;
+            current.value = !isCross ? 1 : -1;
             return current;
         }
 
         if(current.EmptyCells() != 0) return current;
 
         current.IsTerminal = true;
-        current.IsTie = true;
-        current.IsWin = false;
-        current.IsLoss = false;
+        current.value = 0;
         return current;
     }
 
@@ -117,11 +110,11 @@ public class TicTacToeNode : IGameState<TicTacToeNode>
             }
         }
 
+        current.value = isCross ? int.MinValue : int.MaxValue;
         for(int i = 0; i < children.Count; i++)
         {
-            if(children[i].IsWin && isCross) current.IsWin = true;
-            if(children[i].IsLoss && !isCross) current.IsLoss = true;
-            if(!current.IsWin && !current.IsLoss && children[i].IsTie) current.IsTie = true;
+            if(children[i].value > current.value && isCross) current.value = children[i].value;
+            else if(children[i].value < current.value && !isCross) current.value = children[i].value;
         }
 
         current.Children = children.ToArray();
@@ -176,13 +169,12 @@ public class TicTacToeTree
         {
             if(child.change.maxX != chosen.maxX || child.change.maxY != chosen.maxY) continue;
 
-            current = child;
-            if(current.IsTerminal) return current.Board;
-            foreach(TicTacToeNode grandchild in current.Children)
+            if(child.IsTerminal) return current.Board;
+            current = child.Children[0];
+            foreach(TicTacToeNode grandchild in child.Children)
             {
-                if(grandchild.IsWin && isMaximizer) current = grandchild;
-                if(grandchild.IsLoss && !isMaximizer) current = grandchild;
-                else if(grandchild.IsTie && current == child) current = grandchild;
+                if(grandchild.value > current.value && isMaximizer) current = grandchild;
+                if(grandchild.value < current.value && !isMaximizer) current = grandchild;
             }
         }
         return current.Board;

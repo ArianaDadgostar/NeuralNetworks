@@ -83,7 +83,7 @@ public class TicTacToe : Game
         DefineBoard();
         tree = new(true, board);
 
-        board = SetBoard(board);
+        //board = SetBoard(board);
 
         // TODO: use this.Content to load your game content here
     }
