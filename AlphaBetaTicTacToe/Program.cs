@@ -1,2 +1,2 @@
-﻿using var game = new AlphaBetaTicTacToe.Game1();
+﻿using var game = new AlphaBetaTicTacToe.TicTacToe();
 game.Run();

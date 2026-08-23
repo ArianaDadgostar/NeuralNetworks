@@ -5,7 +5,7 @@ using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Security.Principal;
 
-namespace MiniMaxTicTacToe;
+namespace AlphaBetaTicTacToe;
 
 public interface IAlphaBetaState<T> where T : IAlphaBetaState<T>
 {
@@ -100,12 +100,12 @@ public class Node : IAlphaBetaState<Node>
             if(isCross && children[i].Value > current.Alpha)
             {
                 current.Alpha = children[i].Value;
-                current.Value = children[i].Value;
+                current.Value = current.Alpha;
             }
             else if(!isCross && children[i].Value < current.Beta)
             {
                 current.Beta = children[i].Value;
-                current.Value = children[i].Value;
+                current.Value = current.Beta;
             }
         }
 
@@ -133,7 +133,7 @@ public class Node : IAlphaBetaState<Node>
         return node;
     }
 
-    public static Node DefineTree(Node current, bool isCross)
+    public static Node DefineTree(Node current, bool isCross, bool ignore = false)
     {
         current = EvaluateNode(current, !isCross); // is a not because is a child of previous node
         if(current.IsTerminal) return current;
@@ -152,8 +152,13 @@ public class Node : IAlphaBetaState<Node>
                 node.Board[i][j].state = isCross ? CellState.X : CellState.O;
                 node.change = node.Board[i][j];
 
-                node = DefineTree(node, !isCross);
+                node = DefineTree(node, !isCross, ignore);
+                if(isCross && node.Value > current.Alpha) current.Alpha = node.Value;
+                else if(!isCross && node.Value < current.Beta) current.Beta = node.Value;
+
                 children.Add(node);
+
+                if(current.Beta <= current.Alpha && !ignore) return current;
             }
         }
 
@@ -206,16 +211,21 @@ public class AlphaBetaTree
     public Square[][] DefineNextMove(Square chosen)
     {
         if(current.IsTerminal) return current.Board;
-        foreach(Node child in current.Children)
+        for(int i = 0; i < current.Children.Length; i++)
         {
+            Node child = current.Children[i];
             if(child.change.maxX != chosen.maxX || child.change.maxY != chosen.maxY) continue;
 
             if(child.IsTerminal) return current.Board;
+            if(child.Children == null)
+            {
+                child = Node.DefineTree(child, isMaximizer, true);
+            }
             current = child.Children[0];
             foreach(Node grandchild in child.Children)
             {
-                if(grandchild.value > current.value && isMaximizer) current = grandchild;
-                if(grandchild.value < current.value && !isMaximizer) current = grandchild;
+                if(grandchild.Value > current.Value && isMaximizer) current = grandchild;
+                if(grandchild.Value < current.Value && !isMaximizer) current = grandchild;
             }
         }
         return current.Board;

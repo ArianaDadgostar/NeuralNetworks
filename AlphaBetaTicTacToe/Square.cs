@@ -1,4 +1,4 @@
-namespace MiniMaxTicTacToe;
+namespace AlphaBetaTicTacToe;
 
 public enum CellState
 {

@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace MiniMaxTicTacToe;
+namespace AlphaBetaTicTacToe;
 
 /*
     CROSS is MAXIMIZER
@@ -28,7 +28,7 @@ public class TicTacToe : Game
 
     Square[][] board;
 
-    TicTacToeTree tree;
+    AlphaBetaTree tree;
 
     #endregion
 

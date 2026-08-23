@@ -1,4 +1,4 @@
-namespace MiniMaxTicTacToe;
+namespace AlphaBetaTicTacToe;
 internal static class Dimensions
 {
     public const int width = 3;
