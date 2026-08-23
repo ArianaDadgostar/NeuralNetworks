@@ -79,14 +79,18 @@ public class Node : IAlphaBetaState<Node>
             if (a == CellState.None || a != b || b != c) continue;
 
             current.IsTerminal = true;
-            current.Alpha = (isCross && current.Alpha < 1) ? 1 : current.Alpha;
+            current.Value = (a == CellState.X) ? 1 : -1;
+            current.Alpha = (isCross && current.Value > current.Alpha) ? current.Value : current.Alpha;
+            current.Beta = (!isCross && current.Value < current.Beta) ? current.Value : current.Beta;
             return current;
         }
 
         if(current.EmptyCells() != 0) return current;
 
         current.IsTerminal = true;
-        current.Alpha = (current.Alpha < 0) ? current.Alpha : 0;
+        current.Value = 0;
+        current.Alpha = (0 > current.Alpha && isCross) ? 0 : current.Alpha;
+        current.Beta = (0 < current.Beta && !isCross) ? 0 : current.Beta;
         return current;
     }
 
@@ -211,7 +215,9 @@ public class AlphaBetaTree
     public Square[][] DefineNextMove(Square chosen)
     {
         if(current.IsTerminal) return current.Board;
-        for(int i = 0; i < current.Children.Length; i++)
+        int length = current.Children.Length;
+
+        for(int i = 0; i < length; i++)
         {
             Node child = current.Children[i];
             if(child.change.maxX != chosen.maxX || child.change.maxY != chosen.maxY) continue;
@@ -227,6 +233,7 @@ public class AlphaBetaTree
                 if(grandchild.Value > current.Value && isMaximizer) current = grandchild;
                 if(grandchild.Value < current.Value && !isMaximizer) current = grandchild;
             }
+            return current.Board;
         }
         return current.Board;
     }
@@ -234,6 +241,10 @@ public class AlphaBetaTree
     public Square[][] TravelDownTree(Square chosen)
     {
         if(current.IsTerminal) return current.Board;
+        if(current.Children == null)
+        {
+            current = Node.DefineTree(current, isMaximizer, true);
+        }
         foreach(Node child in current.Children)
         {
             if(child.change.maxX != chosen.maxX || child.change.maxY != chosen.maxY) continue;

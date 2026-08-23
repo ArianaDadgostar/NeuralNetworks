@@ -60,6 +60,7 @@ public class TicTacToe : Game
         circle.SetData(new Color[] { Color.Green });
     }
 
+
     void DefineBoard()
     {
         board = new Square[3][];
