@@ -10,7 +10,7 @@ namespace MonteCarloCheckers;
 public class MonteCarloNode
 {
     private double C = 1.5;
-    public Square changed;
+    public Square[] move;
     public bool isTerminal;
     public CellState state;
     public bool expanded;
@@ -21,12 +21,14 @@ public class MonteCarloNode
     public List<double> UCTVals; 
     public List<MonteCarloNode> children;
 
-    public MonteCarloNode(Square changed, 
+    public MonteCarloNode(Square previous,
+                          Square changed, 
                           bool isTerminal, 
                           CellState state, 
                           int value)
     {
-        this.changed = changed;
+        move = new Square[2] {previous, changed};
+
         this.isTerminal = isTerminal;
         this.state = state;
         this.value = value;
@@ -34,37 +36,35 @@ public class MonteCarloNode
         simCount = 0;
     }
 
-    public void AddPossibleMove(List<Square> possible, CellState current, Square[][] board, int x, int y, int extensionX, int extensionY)
-    {
+    public void AddPossibleMove(List<MonteCarloNode> possible, CellState current, Square[][] board, int x, int y, int extensionX, int extensionY, CellState state)
+    { // FIX ADDPOSSIBLE MOVE LOGIC TO INCORPORATE CAPTURES PROPERLY
         if(board[x][y].state == current) return;
         else if(extensionY >= board.Length || extensionY <= 0) return;
         else if(extensionX >= board[0].Length || extensionX <= 0) return;
 
-        possible.Add(board[x][y]);
+        possible.Add(new MonteCarloNode(board[x][y], board[extensionX][extensionY], false, state, int.MaxValue));
     }
 
-    public void AssessMoveOptions(List<Square> possible, Square[][] board, int x, int y, CellState current)
+    public void AssessMoveOptions(List<MonteCarloNode> possible, Square[][] board, int x, int y, CellState current)
     {
-        possible.Add(board[x][y]);
-
         int newY = (current == CellState.Red) ? y - 1 : y + 1;
         int extensionY = (current == CellState.Red) ? newY - 1 : newY + 1;
 
-        AddPossibleMove(possible, current, board, x - 1, newY, x - 2, extensionY);
-        AddPossibleMove(possible, current, board, x + 1, newY, x + 2, extensionY);
+        AddPossibleMove(possible, current, board, x - 1, newY, x - 2, extensionY, state);
+        AddPossibleMove(possible, current, board, x + 1, newY, x + 2, extensionY, state);
 
         if(!board[x][y].isQueen) return;
 
         newY = (current == CellState.Red) ? y + 1 : y - 1;
         extensionY = (current == CellState.Red) ? newY + 1 : newY - 1;
 
-        AddPossibleMove(possible, current, board, x - 1, newY, x - 2, extensionY);
-        AddPossibleMove(possible, current, board, x + 1, newY, x + 2, extensionY);
+        AddPossibleMove(possible, current, board, x - 1, newY, x - 2, extensionY, state);
+        AddPossibleMove(possible, current, board, x + 1, newY, x + 2, extensionY, state);
     }
 
-    public List<Square>[] PossibleMoves(MonteCarloNode node, Square[][] board)
+    public List<MonteCarloNode>[] PossibleMoves(MonteCarloNode node, Square[][] board)
     {
-        List<Square>[] moves = new List<Square>[Dimensions.ChipCount];
+        List<MonteCarloNode>[] moves = new List<MonteCarloNode>[Dimensions.ChipCount];
         int count = 0;
         CellState current = (node.state == CellState.Red) ? CellState.White : CellState.Red;
         int x, y;
@@ -113,8 +113,10 @@ public class MonteCarloNode
 public class MonteCarloTree
 {
     public MonteCarloNode head;
+    public MonteCarloNode current;
+    public bool isMaximizer; // AKA is RED
 
-    public int SimulateTree(MonteCarloNode node, Square[][] board, bool isRed)
+    public int SimulateAndBackProp(MonteCarloNode node, Square[][] board, bool isRed)
     {
         if(node.isTerminal) return node.TerminalStateStatus(node, board);
         
@@ -122,22 +124,25 @@ public class MonteCarloTree
         {
             node.CalculateUCTVals();
             double wantedVal = node.UCTVals.Max();
-            return SimulateTree(node.children[node.FindIndex(wantedVal)], board, !isRed);
+            int value = SimulateAndBackProp(node.children[node.FindIndex(wantedVal)], board, !isRed);
+            node.value += value;
+            node.simCount++;
+            return value;
         }
-        List<Square>[] possible = node.PossibleMoves(node, board);
+        List<MonteCarloNode>[] possible = node.PossibleMoves(node, board);
         Random random = new Random();
 
-        int index = random.Next(possible.Length);
-        Square chosen = possible[index][random.Next(possible[index].Count)];
+        int x = random.Next(possible.Length);
+        int y = random.Next(possible[x].Count);
         CellState state = isRed ? CellState.Red : CellState.White;
         bool nextState = state != CellState.Red;
         
-        return SimulateTree(new MonteCarloNode(chosen, false, state, 0), board, nextState);
+        return SimulateAndBackProp(possible[x][y], board, nextState);
     }
 
-    public MonteCarloNode FindExpandedNode()
+    public MonteCarloNode FindExpandedNode(MonteCarloNode startNode)
     {
-        MonteCarloNode current = head;
+        MonteCarloNode current = startNode;
         Random random = new Random();
         int index = 0;
         while(current.expanded)
@@ -151,5 +156,28 @@ public class MonteCarloTree
             current = current.children[index];
         }
         return current;
+    }
+
+    public void EvaluateTree(MonteCarloNode start)
+    {
+        
+    }
+    
+    public Square[][] DefineNextMove(Square[][] board, Square newMove)
+    {
+        foreach(MonteCarloNode child in current.children)
+        {
+            if(newMove != child.move[1]) continue;
+
+            current = child;
+            break;
+        }
+
+        if(current == null) return null;
+
+        else if(current.children == null)
+        {
+            
+        }
     }
 }
