@@ -17,7 +17,10 @@ public class Game1 : Game
     private Square selected;
     private Square target;
     private bool isMousePressed = false;
-    private bool userIsRed = true;
+    private CellState userState = CellState.White;
+    private CellState initial = CellState.Red;
+
+    private MonteCarloTree tree;
 
     public Game1()
     {
@@ -41,6 +44,15 @@ public class Game1 : Game
         }
     }
 
+    public void InitialIterations()
+    {
+        for(int i = 0; i < 30; i++)
+        {
+            tree.SimulateAndBackProp(tree.head, board, true, 0);
+        }
+        ;
+    }
+
     protected override void Initialize()
     {
         square = new Texture2D(GraphicsDevice, 1, 1);
@@ -51,6 +63,10 @@ public class Game1 : Game
         _graphics.ApplyChanges();
 
         SetupBoard();
+
+        tree = new MonteCarloTree(initial);
+
+        InitialIterations();
 
         base.Initialize();
     }
@@ -81,13 +97,21 @@ public class Game1 : Game
     public bool CanMovePiece()
     {
         if(target is null || selected is null) return false;
-        if(selected.state == CellState.None)
+
+        int length = Math.Abs(selected.x - target.x);
+        if(selected.state == CellState.None || selected.state != userState)
         {
             selected = null;
             return false;
         }
-        if(target.state != CellState.None)
+        else if(target.state != CellState.None)
         {
+            target = null;
+            return false;
+        }
+        else if(length < Dimensions.SquareSize || length > Dimensions.SquareSize)
+        {
+            selected = null;
             target = null;
             return false;
         }
@@ -110,6 +134,9 @@ public class Game1 : Game
 
         target.state = selected.state;
         selected.state = CellState.None;
+
+        board = tree.DefineNextMove(board, selected, target); // return board every time 10-10-26
+
         target = null;
         selected = null;
 
